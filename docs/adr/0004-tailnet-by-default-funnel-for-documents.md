@@ -4,4 +4,4 @@ Services are reached through Caddy on the tailnet, so every URL needs Tailscale.
 
 ## Consequences
 
-- Euro-Office is meant to be public, but as of 2026-10-28 it is tailnet-only and broken after an attempt to move it to Funnel. See `docs/incidents/2026-10-28-euro-office-broken-after-funnel-switch.md`.
+- Euro-Office is public through Funnel on `:8443` since 2026-10-28, after the first attempt left it tailnet-only and broken. See `docs/incidents/2026-10-28-euro-office-broken-after-funnel-switch.md`. To check it end to end, run `docs/runbooks/euro-office-check.sh`.
