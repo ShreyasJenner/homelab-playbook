@@ -1,0 +1,3 @@
+# No secrets in the Playbook
+
+Secrets (passwords, API tokens, keys) are never committed. The Playbook uses placeholders such as `<GITEA_DB_PASSWORD>` and says where the real value lives (password manager, a `.env` file on the host). Internal IPs and hostnames are allowed, because the Playbook is useless for debugging without them. We chose this over committing everything to a private repo, or encrypting secrets in the repo with sops/git-crypt, because a secret committed once stays in git history even after it is deleted, and because the source chats are full of real credentials that would otherwise get pasted straight in.
