@@ -16,6 +16,10 @@ _Avoid_: Server, box, node
 One self-hosted application, running on a host.
 _Avoid_: App, container (a service may be more than one container)
 
+**User**:
+A person who uses the homelab's services. Each User has their own accounts and, for some services, their own instance.
+_Avoid_: Account (an account is one User's login on one service; admin is an account, not a User), member
+
 **Exposure**:
 Who can reach a service: *tailnet-only* (the default: only devices on the tailnet, through the reverse proxy; not the home LAN or the internet) or *public* (open to the internet through Funnel).
 _Avoid_: Access (that means logging in), visibility, open
