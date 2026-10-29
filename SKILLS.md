@@ -7,7 +7,7 @@ Skills written for this repo. Each is user-invoked: type its name in Claude Code
 | [`homelab-playbook`](.claude/skills/homelab-playbook/SKILL.md) | `/homelab-playbook` or `/homelab-playbook <task>` | Continue writing the Playbook from the plan's Progress section, one group at a time, pausing before each commit. With no task, it does the plan's "Next". |
 | [`homelab-followups`](.claude/skills/homelab-followups/SKILL.md) | `/homelab-followups 10 28` | Carry out follow-ups (homelab changes listed in the plan's Follow-ups) one at a time, through paste blocks you run on the host, then record the results in the Playbook. With no numbers, it lists the open ones and asks. |
 
-Both skills follow the rules in [`homelab-shared/RULES.md`](.claude/skills/homelab-shared/RULES.md) (paste blocks, secrets, commits). Change a rule there, once.
+Both skills follow the repo rules in [`AGENTS.md`](AGENTS.md) (page templates, links, paste blocks, secrets, commits), which every session loads through `CLAUDE.md`. Change a rule there, once.
 
 The link checker is `bash .claude/skills/homelab-playbook/check-links.sh`. It prints every broken relative link under `docs/`, and nothing when all are fine.
 

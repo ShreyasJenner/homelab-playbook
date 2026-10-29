@@ -7,7 +7,7 @@ argument-hint: "[follow-up numbers, e.g. 10 28]"
 
 Follow-ups to work on: $ARGUMENTS
 
-Follow-ups are homelab changes, not Playbook writing. Their status lives in the **Follow-ups** list of `.scratch/playbook/plan.md` (Progress section). The drafted commands for each open one are in [`HOWTO.md`](HOWTO.md), in priority order. Read [`../homelab-shared/RULES.md`](../homelab-shared/RULES.md) first: it covers paste blocks, secrets and commits.
+Follow-ups are homelab changes, not Playbook writing. Their status lives in the **Follow-ups** list of `.scratch/playbook/plan.md` (Progress section). The drafted commands for each open one are in [`HOWTO.md`](HOWTO.md), in priority order. Paste blocks, secrets, page templates and commits follow `AGENTS.md`.
 
 ## Steps
 
@@ -19,4 +19,4 @@ Follow-ups are homelab changes, not Playbook writing. Their status lives in the 
    - Mark it done in the plan's Follow-ups list, and delete its section from `HOWTO.md`.
    - Write an incident note for anything that went wrong on the way, plus a runbook if the problem has happened before.
    - Done when `grep -rn -i 'follow-up <n>' docs/` shows only pages that describe it as done.
-5. **Commit**, following the shared rules. Update the plan's Progress section after every follow-up.
+5. **Commit**, following `AGENTS.md`. Update the plan's Progress section after every follow-up.
