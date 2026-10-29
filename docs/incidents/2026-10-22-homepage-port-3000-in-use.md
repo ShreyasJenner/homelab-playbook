@@ -3,7 +3,7 @@
 - **Date:** 2026-10-22
 - **Status:** resolved
 - **Service:** Homepage
-- **Runbook:** [Connection reset after choosing or changing a port](../runbooks/connection-reset-after-port-change.md)
+- **Runbook:** [Connection reset after choosing or changing a port](../runbooks/connection-reset-after-port-change.md); also [Homepage is blank, or a tile is red](../runbooks/homepage-blank-or-tile-red.md)
 - **Source:** chat "Homepage dashboard via Docker" (2026-10-22). Unverified.
 
 ## Symptom

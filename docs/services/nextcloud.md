@@ -135,3 +135,4 @@ Through `stacks.sh update` (`nextcloud` is in the default list). Nextcloud doesn
 - [2026-10-02: Nextcloud's files consumed by Paperless-ngx](../incidents/2026-10-02-nextcloud-files-consumed-by-paperless.md)
 - [2026-10-04: files:scan blocked by a stale lock again](../incidents/2026-10-04-nextcloud-scan-blocked-by-stale-lock-again.md)
 - [2026-10-06: imported files had the wrong owner](../incidents/2026-10-06-nextcloud-files-imported-with-wrong-owner.md)
+- [2026-10-28: document editing broke after Euro-Office was switched to Funnel](../incidents/2026-10-28-euro-office-broken-after-funnel-switch.md)

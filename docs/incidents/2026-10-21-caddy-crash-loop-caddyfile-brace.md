@@ -3,7 +3,7 @@
 - **Date:** 2026-10-21
 - **Status:** resolved
 - **Service:** Caddy
-- **Runbook:** none
+- **Runbook:** [A new container won't start or crash-loops](../runbooks/new-container-crash-loops.md)
 - **Source:** chat "Port allocation on self-hosted servers" (2026-10-21). Unverified.
 
 ## Symptom

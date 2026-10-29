@@ -55,6 +55,7 @@ That's how this laptop is set up (key "Laptop" in Gitea). Add `IdentitiesOnly ye
 ## Runbooks
 
 - [Gitea SSH clone or push fails](../runbooks/gitea-ssh-clone-or-push-fails.md)
+- [A service URL returns 502 or closes the connection](../runbooks/service-url-returns-502.md)
 - [Connection reset after choosing or changing a port](../runbooks/connection-reset-after-port-change.md)
 - [A service's address changed](../runbooks/service-address-changed.md)
 

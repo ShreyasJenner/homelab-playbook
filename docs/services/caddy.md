@@ -95,6 +95,7 @@ A change to the compose file (volumes, env) needs `sudo docker compose up -d` in
 
 - [A service URL returns 502 or closes the connection](../runbooks/service-url-returns-502.md)
 - [Names don't resolve: MagicDNS and the host's DNS](../runbooks/names-dont-resolve.md)
+- [A new container won't start or crash-loops](../runbooks/new-container-crash-loops.md)
 
 ## Incidents
 

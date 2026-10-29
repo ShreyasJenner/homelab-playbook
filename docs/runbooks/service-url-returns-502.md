@@ -59,6 +59,9 @@ Expected:
 4. **The wrong mode.** SSH through an `--https` entry closes immediately; it needs `--tcp`.
 5. **The backend is down or crash-looping**, or listening on a different port from the one in the route. An app's own port setting is the port inside the container, so it must match the right-hand side of `ports:`.
 6. **A `serve reset` removed entries** that weren't added back.
+7. **Caddy itself is down.** Every `*.example.com` URL fails at once, while the Serve/Funnel entries still work. If `sudo docker ps | grep caddy` shows it restarting, see [A new container won't start or crash-loops](new-container-crash-loops.md).
+
+Not this runbook: document editing says "cannot be reached" right after the host's LAN address changed. See [Document editing broke after the host's LAN address changed](document-editing-broke-after-lan-ip-change.md).
 
 ## Fix
 
@@ -87,4 +90,6 @@ To remove a single entry: `sudo tailscale serve --https=<port> off` (or `--tcp=<
 - [2026-07-19: Nextcloud 502 after turning on Funnel](../incidents/2026-07-19-nextcloud-502-after-enabling-funnel.md)
 - [2026-08-05: Nextcloud 502 after re-enabling Funnel](../incidents/2026-08-05-nextcloud-502-after-re-enabling-funnel.md)
 - [2026-08-14: Nextcloud down after funneling Collabora](../incidents/2026-08-14-nextcloud-down-after-funneling-collabora.md)
+- [2026-10-22: Gitea SSH clone closed the connection](../incidents/2026-10-22-gitea-ssh-clone-connection-closed.md)
+- [2026-10-24: Gitea down after `app.ini` edits](../incidents/2026-10-24-gitea-down-after-app-ini-edits.md)
 - [2026-10-28: Euro-Office broken after switching it to Funnel](../incidents/2026-10-28-euro-office-broken-after-funnel-switch.md)

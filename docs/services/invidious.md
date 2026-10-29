@@ -44,6 +44,10 @@ A private YouTube frontend, in the browser. The iOS app Yattee can use it too.
 - `popular_enabled: true` mixes everyone's subscriptions into one "Popular" feed. Use each account's Subscriptions feed instead.
 - Uptime Kuma doesn't monitor it.
 
+## Runbooks
+
+- [A compose or `.env` change didn't take effect](../runbooks/compose-change-didnt-take-effect.md)
+
 ## Incidents
 
 - [2026-09-23: database login failed](../incidents/2026-09-23-invidious-database-login-failed.md)

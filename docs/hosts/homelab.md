@@ -132,4 +132,5 @@ A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 
 - [2026-09-10: server offline after moving to a new network](../incidents/2026-09-10-server-offline-after-network-move.md) (resolved)
 - [2026-07-21: Tailscale and dhcpcd fought over the server's DNS](../incidents/2026-07-21-server-dns-fight-with-dhcpcd.md) (resolved)
 - [2026-10-02: media libraries empty after the HDD mounted late](../incidents/2026-10-02-media-libraries-empty-after-late-hdd-mount.md) (resolved)
+- [2026-10-04: `stacks.sh` found no compose files](../incidents/2026-10-04-stacks-sh-no-compose-file-found.md) (resolved)
 - [2026-10-11: HDD not mounted after the automount test](../incidents/2026-10-11-hdd-not-mounted-after-automount-test.md) (resolved)

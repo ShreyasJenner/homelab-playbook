@@ -31,7 +31,7 @@ sudo ss -tlnp | grep ':<host port>\b'              # is the host port already ta
 
 - **Directory instead of file:** `sudo docker compose down <service>`, `sudo rmdir <path>`, create the real file, then `sudo docker compose up -d`.
 - **Ownership:** `sudo chown -R <uid>:<uid> <data folder>`. In the app's config, keep every writable path (data, WAL, compactor, cache) under the mounted folder, never under `/tmp` or `/var/…` inside the container.
-- **Config format:** validate before restarting when the image has a check mode (Loki: `-verify-config`; see the 2026-10-28 Loki incident for the command). Read the release notes of the version `latest` just pulled.
+- **Config format:** validate before restarting when the image has a check mode (Loki: `-verify-config`, see the 2026-10-28 Loki incident for the command; Caddy: `caddy validate`, see the [Caddy page](../services/caddy.md#adding-or-changing-a-route)). Read the release notes of the version `latest` just pulled.
 - **Port:** write listen addresses as `:<port>`; pick a host port that `ss -tlnp` shows free.
 
 Then `sudo docker compose up -d` and watch `sudo docker compose logs -f <service>` until it settles.
@@ -49,3 +49,4 @@ Then `sudo docker compose up -d` and watch `sudo docker compose logs -f <service
 - [2026-08-29: Loki crash-looped on its compactor config](../incidents/2026-08-29-loki-crash-loop-compactor-config.md)
 - [2026-08-30: ntfy `auth-users` type mismatch](../incidents/2026-08-30-ntfy-auth-users-type-mismatch.md)
 - [2026-08-30: ntfy listen address missing its colon](../incidents/2026-08-30-ntfy-listen-address-missing-colon.md)
+- [2026-10-21: Caddy crash-looped on a Caddyfile brace error](../incidents/2026-10-21-caddy-crash-loop-caddyfile-brace.md)

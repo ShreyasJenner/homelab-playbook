@@ -3,7 +3,7 @@
 - **Date:** 2026-10-22
 - **Status:** resolved
 - **Service:** Gitea
-- **Runbook:** [Gitea SSH clone or push fails](../runbooks/gitea-ssh-clone-or-push-fails.md)
+- **Runbook:** [Gitea SSH clone or push fails](../runbooks/gitea-ssh-clone-or-push-fails.md); also [A service URL returns 502 or closes the connection](../runbooks/service-url-returns-502.md)
 - **Source:** chat "Gitea SSH clone connection issue" (2026-10-22). Unverified; end state verified 2026-10-28.
 
 ## Symptom

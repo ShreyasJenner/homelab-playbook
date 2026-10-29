@@ -3,7 +3,7 @@
 - **Date:** 2026-10-24
 - **Status:** resolved (the exact fix isn't recorded)
 - **Service:** Gitea
-- **Runbook:** [Connection reset after choosing or changing a port](../runbooks/connection-reset-after-port-change.md)
+- **Runbook:** [Connection reset after choosing or changing a port](../runbooks/connection-reset-after-port-change.md); also [A service URL returns 502 or closes the connection](../runbooks/service-url-returns-502.md)
 - **Source:** chat "Gitea SSH clone URL" (2026-10-24). Unverified; end state verified 2026-10-28.
 
 ## Symptom

@@ -45,6 +45,7 @@ It came out of the Authentik dead end (2026-10-11). The wish was "a sort of home
 
 - [Homepage is blank, or a tile is red](../runbooks/homepage-blank-or-tile-red.md)
 - [A service's address changed](../runbooks/service-address-changed.md)
+- [Connection reset after choosing or changing a port](../runbooks/connection-reset-after-port-change.md)
 
 ## Incidents
 
