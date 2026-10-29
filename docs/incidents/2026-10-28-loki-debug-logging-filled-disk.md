@@ -1,7 +1,7 @@
 # Loki logged at debug level into an unrotated Docker log, and kept everything forever
 
 - **Date:** found 2026-10-28; building up since the Loki container was created on 2026-10-04
-- **Status:** resolved 2026-10-28 (one check left: the next restic run skips the data directories)
+- **Status:** resolved 2026-10-29
 - **Service:** Loki (monitoring stack on homelab), with Alloy and the nightly restic backup affected
 - **Runbook:** none (first occurrence). Check script: [`loki-storage-check.sh`](../runbooks/loki-storage-check.sh)
 
@@ -72,7 +72,10 @@ About 2½ h later (about 19:30 PDT), `loki-storage-check.sh` returned `VERDICT=G
 - **Retention deleted the existing data.** Daily index tables went from 56 to 8, and `loki/data` from 17 GB to 2.6 GB. `/` is now 167 GB used, 51 GB less than before. The Loki 3.7 retention docs say period changes "are not retroactive", but on this setup (tsdb on the filesystem store) they were applied to data already stored. It took one apply run (every 15 min) plus `retention_delete_delay` (2 h).
 - Loki's own log grows 6 KiB/min. The largest container log anywhere is 27 MB.
 
-**Still to confirm:** that the 2026-10-29 02:30 restic run skips both data directories.
+**The 2026-10-29 restic run skipped both data directories** (`journalctl -u restic-docker-backup.service`, compared with the 2026-10-28 run):
+- Files processed went from 170,398 to 130,584 (−39,814; Loki had about 41,000 chunk files).
+- Size went from 230.6 GiB to 214.8 GiB (−15.7 GiB).
+- `restic check`: no errors.
 
 ## Left over
 
