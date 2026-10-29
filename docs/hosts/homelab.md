@@ -76,20 +76,20 @@ Every stack is a Compose project in `~/docker/<stack>/`, with its config and dat
 | `euro-office` | `euro-office` | [Euro-Office](../services/euro-office.md) |
 | `gitea` | `gitea` | Gitea |
 | `homepage` | `homepage-homepage-a-1`, `homepage-homepage-b-1` | Homepage (one instance per User) |
-| `invidious` | `invidious-invidious-1`, `invidious-companion-1`, `invidious-invidious-db-1` | Invidious |
-| `jellyfin` | `jellyfin` | Jellyfin |
-| `kavita` | `kavita` | Kavita |
+| `invidious` | `invidious-invidious-1`, `invidious-companion-1`, `invidious-invidious-db-1` | [Invidious](../services/invidious.md) |
+| `jellyfin` | `jellyfin` | [Jellyfin](../services/jellyfin.md) |
+| `kavita` | `kavita` | [Kavita](../services/kavita.md) |
 | `memos` | `memos` | Memos |
 | `mindwtr` | `mindwtr-app`, `mindwtr-cloud` | Mindwtr |
 | `monitoring` | `grafana`, `prometheus`, `loki`, `alloy`, `node-exporter`, `cadvisor` | Monitoring stack |
-| `navidrome` | `navidrome` | Navidrome |
+| `navidrome` | `navidrome` | [Navidrome](../services/navidrome.md) |
 | `nextcloud` | `nextcloud_app`, `nextcloud_db` | [Nextcloud](../services/nextcloud.md) |
 | `ntfy` | `ntfy` | ntfy |
-| `redlib` | `redlib-shreyas`, `redlib-bob` | Redlib (one instance per User) |
+| `redlib` | `redlib-shreyas`, `redlib-bob` | [Redlib](../services/redlib.md) (one instance per User) |
 | `uptime-kuma` | `uptime-kuma` | Uptime Kuma |
 | `vaultwarden` | `vaultwarden` | Vaultwarden |
 
-**Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik`, `collabora` ([page](../services/collabora.md)), `dailytxt`, `donetick`, `maloja`, `materialious`, `onlyoffice` ([page](../services/onlyoffice.md)), `paperless-ngx`, `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
+**Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik`, `collabora` ([page](../services/collabora.md)), `dailytxt`, `donetick`, `maloja` ([page](../services/maloja.md)), `materialious` ([page](../services/materialious.md)), `onlyoffice` ([page](../services/onlyoffice.md)), `paperless-ngx`, `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
 
 ### Updating: `~/docker/stacks.sh`
 
@@ -110,12 +110,14 @@ A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 
 
 ## Gaps
 
-- Docker log rotation isn't configured. One container's log file reached 38 GB (being fixed, 2026-10-28).
+- Docker log rotation has been configured since 2026-10-28: `/etc/docker/daemon.json` sets `json-file` with `max-size 10m` and `max-file 3`. Containers created before that keep uncapped logs until they're next recreated; `docs/runbooks/loki-storage-check.sh` lists them. The trigger was Loki's own debug log reaching 38 GB ([incident](../incidents/2026-10-28-loki-debug-logging-filled-disk.md)).
 
 ## Runbooks
 
 - [A service URL returns 502 or closes the connection](../runbooks/service-url-returns-502.md)
 - [Names don't resolve: MagicDNS and the host's DNS](../runbooks/names-dont-resolve.md)
+- [Media libraries are empty, or nothing runs, after a reboot](../runbooks/media-libraries-empty-after-reboot.md)
+- [A compose or `.env` change didn't take effect](../runbooks/compose-change-didnt-take-effect.md)
 
 ## Incidents
 
@@ -123,3 +125,5 @@ A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 
 - [Euro-Office broken after switching it to Funnel](../incidents/2026-10-28-euro-office-broken-after-funnel-switch.md) (resolved)
 - [2026-09-10: server offline after moving to a new network](../incidents/2026-09-10-server-offline-after-network-move.md) (resolved)
 - [2026-07-21: Tailscale and dhcpcd fought over the server's DNS](../incidents/2026-07-21-server-dns-fight-with-dhcpcd.md) (resolved)
+- [2026-10-02: media libraries empty after the HDD mounted late](../incidents/2026-10-02-media-libraries-empty-after-late-hdd-mount.md) (resolved)
+- [2026-10-11: HDD not mounted after the automount test](../incidents/2026-10-11-hdd-not-mounted-after-automount-test.md) (resolved)
