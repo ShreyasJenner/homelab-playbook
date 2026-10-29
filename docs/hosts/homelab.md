@@ -81,12 +81,12 @@ Every stack is a Compose project in `~/docker/<stack>/`, with its config and dat
 | `kavita` | `kavita` | [Kavita](../services/kavita.md) |
 | `memos` | `memos` | [Memos](../services/memos.md) |
 | `mindwtr` | `mindwtr-app`, `mindwtr-cloud` | [Mindwtr](../services/mindwtr.md) |
-| `monitoring` | `grafana`, `prometheus`, `loki`, `alloy`, `node-exporter`, `cadvisor` | Monitoring stack |
+| `monitoring` | `grafana`, `prometheus`, `loki`, `alloy`, `node-exporter`, `cadvisor` | [Monitoring stack](../services/monitoring.md) |
 | `navidrome` | `navidrome` | [Navidrome](../services/navidrome.md) |
 | `nextcloud` | `nextcloud_app`, `nextcloud_db` | [Nextcloud](../services/nextcloud.md) |
-| `ntfy` | `ntfy` | ntfy |
+| `ntfy` | `ntfy` | [ntfy](../services/ntfy.md) |
 | `redlib` | `redlib-shreyas`, `redlib-bob` | [Redlib](../services/redlib.md) (one instance per User) |
-| `uptime-kuma` | `uptime-kuma` | Uptime Kuma |
+| `uptime-kuma` | `uptime-kuma` | [Uptime Kuma](../services/uptime-kuma.md) |
 | `vaultwarden` | `vaultwarden` | [Vaultwarden](../services/vaultwarden.md) |
 
 **Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik` ([page](../services/authentik.md)), `collabora` ([page](../services/collabora.md)), `dailytxt`, `donetick` ([page](../services/donetick.md)), `maloja` ([page](../services/maloja.md)), `materialious` ([page](../services/materialious.md)), `onlyoffice` ([page](../services/onlyoffice.md)), `paperless-ngx` ([page](../services/paperless-ngx.md)), `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
