@@ -38,7 +38,7 @@ cd ~/docker/euro-office && sudo docker compose restart
 
 The same fields can be changed in Admin settings → Nextcloud Office.
 
-**Prevention:** reserve the address for homelab in the router (follow-up 1 in the plan). That removes the cause.
+**Prevention:** reserve the address for homelab in the router (follow-up 1). That removes the cause.
 
 ## Verify
 

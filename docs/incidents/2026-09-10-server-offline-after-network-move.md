@@ -21,4 +21,4 @@ Removed the ifupdown Wi-Fi stanza and let NetworkManager manage `wlp130s0`. The 
 ## Follow-on effects
 
 - The LAN address change broke Euro-Office for a while, because Nextcloud and Euro-Office call each other on the LAN address ([2026-09-12](2026-09-12-document-editing-broke-after-lan-ip-change.md)).
-- The address still isn't reserved in the router (follow-up 1 in the plan).
+- The address still isn't reserved in the router (follow-up 1).

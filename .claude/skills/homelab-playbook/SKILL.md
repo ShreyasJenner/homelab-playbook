@@ -11,7 +11,7 @@ The plan and its **Progress** section are in `.scratch/playbook/plan.md`. Progre
 
 ## Steps
 
-1. **Load context.** Read the whole Progress section of the plan, including the Follow-ups list, then `GLOSSARY.md` and `docs/adr/`. Read one or two existing pages of each type you'll write (in `docs/hosts/`, `services/`, `runbooks/` and `incidents/`), plus every existing page the work touches, and match their style. Done when you can name the next unit of work and every page it will create or change.
+1. **Load context.** Read the whole Progress section of the plan, then `GLOSSARY.md` and `docs/adr/`. Read one or two existing pages of each type you'll write (in `docs/hosts/`, `services/`, `runbooks/` and `incidents/`), plus every existing page the work touches, and match their style. Done when you can name the next unit of work and every page it will create or change.
 2. **Check dependencies.** If Progress says the work waits on something (another session's commit, the user's review, a check result), confirm it with `git log` and `git status`. If it isn't there yet, tell the user and wait. Done when every dependency is confirmed met.
 3. **Write one group.** If no work was named above, do the plan's "Next".
    - Sources rank as the plan says: `.scratch/playbook/research/01-verified-2026-10-28.md` > `00-user-answers.md` > the notes file for the topic. What the user tells you first-hand outranks the notes too.

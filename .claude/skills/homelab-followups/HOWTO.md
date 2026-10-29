@@ -1,6 +1,6 @@
 # Open follow-ups: drafted commands
 
-Drafted 2026-10-28 and untested; the numbers are those in `.scratch/playbook/plan.md`. The sections are in priority order, and a section is deleted once its follow-up is done. The user decided against clean-up for 27 and 31, so those are optional.
+Drafted 2026-10-28 and untested; the numbers are those in [`FOLLOWUPS.md`](FOLLOWUPS.md). The sections are in priority order, and a section is deleted once its follow-up is done. The user decided against clean-up for 27 and 31, so those are optional.
 
 ## 1. Security
 

@@ -89,7 +89,7 @@ A change to the compose file (volumes, env) needs `sudo docker compose up -d` in
 ## Gaps
 
 - **How Caddy gets updated.** If the compose file uses `build: .` (the custom image), `stacks.sh update` only pulls and won't rebuild, so Caddy stays on its old version. To check: `grep -n -E 'image:|build:' ~/docker/caddy/docker-compose.yml; ls ~/docker/caddy`. If it's built, the update is `sudo docker compose build --pull && sudo docker compose up -d`.
-- **Uptime Kuma doesn't check Caddy.** Every Kuma monitor uses `localhost`, so a Caddy, certificate or DNS failure wouldn't raise an alert (follow-up 11 in the plan).
+- **Uptime Kuma doesn't check Caddy.** Every Kuma monitor uses `localhost`, so a Caddy, certificate or DNS failure wouldn't raise an alert (follow-up 11).
 
 ## Runbooks
 

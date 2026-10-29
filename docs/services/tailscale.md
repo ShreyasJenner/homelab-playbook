@@ -58,7 +58,7 @@ These caused most of the past outages. See the [runbook](../runbooks/service-url
 - **`--https` speaks HTTP behind TLS, so SSH through it closes at once.** SSH needs `--tcp`. Funnel can't carry SSH at all.
 - **A container can't reliably reach its own host's Funnel URL** (the request times out). That's why Nextcloud and Euro-Office call each other on the LAN address, and only the browser uses the Funnel URL.
 - **`--set-path` doesn't strip the path prefix,** so apps without a base-URL setting break under a subpath. This sank the Collabora `/collabora` attempt.
-- **Funnel exposes Nextcloud's whole login page**, not only share links. Nextcloud 2FA is off (follow-up in the plan).
+- **Funnel exposes Nextcloud's whole login page**, not only share links. Nextcloud 2FA is off (follow-up 2).
 - When the text output of `serve status` is unclear, `sudo tailscale serve status --json` shows the exact `Proxy` target.
 
 ### DNS on homelab
@@ -70,7 +70,7 @@ These caused most of the past outages. See the [runbook](../runbooks/service-url
 - **One Serve HTTPS port per service** (`:6743` Navidrome, `:7843` Vaultwarden/Kavita, `:9343` Memos, `:10000` Donetick, `:3407` Invidious, and others). Retired on 2026-10-21 with a `serve reset`, because ports drifted from the notes without any error, port numbers got reused, Bitwarden treated every port as the same site, Funnel only allows three ports, and the reset scripts were fragile. Replaced by [Caddy](caddy.md) on `*.example.com`.
 - **Nextcloud on Funnel `:443`.** It moved to `:10000` on 2026-10-21 so Caddy could have 443.
 
-Some app settings still carry the old `ts.net:<port>` addresses: Vaultwarden's `DOMAIN`, Mindwtr's CORS origin and Gitea's `ROOT_URL` (follow-ups 16–18 in the plan).
+Some app settings still carry the old `ts.net:<port>` addresses: Vaultwarden's `DOMAIN`, Mindwtr's CORS origin and Gitea's `ROOT_URL` (follow-ups 16–18).
 
 ## Gaps
 

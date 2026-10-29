@@ -18,4 +18,4 @@ Nextcloud and Euro-Office call each other on the LAN address, and the address ha
 
 Updated both internal addresses and `trusted_domains` to `198.51.100.10`, then restarted both containers. How exactly isn't recorded, but on 2026-10-28 all three hold the new address.
 
-The address still isn't reserved in the router, so this will happen again on the next change (follow-up 1 in the plan).
+The address still isn't reserved in the router, so this will happen again on the next change (follow-up 1).

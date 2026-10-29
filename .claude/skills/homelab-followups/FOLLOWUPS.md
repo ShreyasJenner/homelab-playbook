@@ -1,0 +1,38 @@
+# Follow-ups
+
+Homelab changes on homelab, not Playbook writing. This list is the single record of their status; the drafted commands for open ones are in [`HOWTO.md`](HOWTO.md). Moved here from the gitignored `.scratch/playbook/plan.md` on 2026-10-29, so it travels with the repo. Numbers are stable: done items stay, marked done.
+
+1. Reserve `198.51.100.10` for homelab in the router (DHCP over Wi-Fi; the Euro-Office connector embeds the IP).
+2. Turn on Nextcloud 2FA. `twofactor_totp` is already enabled; accounts just need to enrol. Nextcloud is public.
+4. Bind Docker-published ports to `127.0.0.1` (open LAN-exposure incident; Nextcloud/Euro-Office LAN-IP coupling first).
+5. Restic password: confirm the Bitwarden offline cache works (Lock, not Log out, with PIN/biometrics; test in airplane mode), and consider an independent copy. Without it, both backups (HDD repo and B2) are unreadable.
+6. `backup/vns` and `media/games` (Nextcloud external storage) are in no backup. TV, anime and movies aren't either (by choice?).
+7. ~~Check last night's restic run and the mount guard~~: **done (2026-10-28).** The run exited 0, B2 synced, and the script aborts without touching containers if the backup disk or its marker is missing.
+8. If the 4 TB HDD doesn't mount, Docker doesn't start (`RequiresMountsFor`). It needs a runbook.
+9. **Done (2026-10-28):** `limits_config.retention_period: 168h` is live (`1w`). The compactor deleted the existing data: index tables went from 56 to 8, and `loki/data` from 17 GB to 2.6 GB. Also turned off: debug logging (the cause; see 15) and the pattern ingester (`/ready` now passes). Incident: `docs/incidents/2026-10-28-loki-debug-logging-filled-disk.md`.
+10. The monitoring ports Prometheus `9090`, Loki `3517`, cAdvisor `8186` and Alloy `12761` are published on `0.0.0.0` without authentication. Nothing outside the Docker network needs them, so drop the publishes. This is part of follow-up 4.
+11. Uptime Kuma only checks `localhost`, so Caddy, Tailscale and DNS failures go unseen. Gitea, Memos, Homepage, Euro-Office, Redlib and Invidious aren't monitored at all. Consider monitors on the real `*.example.com` URLs.
+12. Add `gitea` and `vaultwarden` to `DEFAULT_STACKS` in `~/docker/stacks.sh`. Today `stacks.sh update` never updates them; Vaultwarden hasn't been updated since 2026-10-15. Reclaim the 51 GB of unused images and 17 GB of build cache, and consider adding `docker image prune -f` after `update`.
+13. ~~Attach the "Kuma Alert" ntfy notification to the Vaultwarden monitor~~: done. The UI shows the alert on every monitor (user, 2026-10-28).
+14. Keep Loki and Prometheus data out of restic (about 19 GB a night, to the HDD and B2). The script already honours `--exclude-if-present .nobackup`, so a `.nobackup` file in `~/docker/monitoring/loki/data` and `~/docker/monitoring/prometheus/data` is enough. **Done (2026-10-28, confirmed 2026-10-29):** both `.nobackup` files are in place. The 02:30 run went from 170,398 files / 230.6 GiB to 130,584 files / 214.8 GiB. Old snapshots keep the data until they're pruned.
+15. **Done (2026-10-28):** the 38 GB log was **Loki's own** (`log_level: debug`); it's now `info`. `/etc/docker/daemon.json` sets `json-file` `max-size 10m` / `max-file 3`, Docker was restarted, and recreating Loki freed the 38 GB. **Left:** containers created before 2026-10-28 stay uncapped until they're next recreated (`docs/runbooks/loki-storage-check.sh` lists them). Optional: persist Alloy's `--storage.path`, so the restart after the nightly backup no longer re-sends old lines (about 41 harmless rejected batches a day).
+16. Vaultwarden `DOMAIN` is still `https://homelab.tail0000.ts.net:9758`. Set it to `https://vault.example.com` and recreate the container.
+17. Mindwtr `MINDWTR_CLOUD_CORS_ORIGIN` is still `https://homelab.tail0000.ts.net:6390`. Set it to `https://task.example.com`. Low priority: the user syncs with the native app, so it has no effect today.
+18. Gitea `app.ini`: `ROOT_URL = https://gitea.example.com/`, `DOMAIN = gitea.example.com`. Decide whether `SSH_DOMAIN`/`SSH_PORT` should show the Serve address (`homelab.tail0000.ts.net`, `8313`) or stay at the `gitea` alias. Turn on Gitea 2FA.
+19. ~~Bitwarden URI match~~: not an issue. The default is Base domain, and the user sets Host on each saved login.
+20. `redlib-shreyas` and `redlib-bob` are both `unhealthy` (2026-10-28). Investigate.
+21. Add to the LAN-exposure incident: Gitea `8310` and **SSH `8312`**, Memos `9418`, Mindwtr `6301`/`6302`, Actual Budget `5006`, Invidious `3000`.
+22. Turn on Vaultwarden 2FA (it's off). Do follow-up 16 (`DOMAIN`) first if using a passkey or security key.
+23. **Invidious's Postgres is a named volume (`invidious_postgresdata`), outside `~/docker`, so restic doesn't back it up.** Bind-mount it under `~/docker/invidious`, or `pg_dump` it before the backup.
+24. Jellyfin's discovery port is published as `7461/udp`, not the default `7359`. Fix `UDP_HOST_PORT` in `~/docker/jellyfin/.env` if LAN discovery is wanted.
+25. Redlib: the healthcheck uses `wget`, which isn't in the image, so it's always "unhealthy". Fix or remove the healthcheck. Browsing works (user, 2026-10-28), and the startup 403 is noise. The polak14 fork is temporary: move back to upstream `redlib-org/redlib` once it has the fix.
+26. Invidious: `registration_enabled: true`, `popular_enabled: true`, and the companion `public_url` points at `youtube.example.com/companion`, which Caddy doesn't route to the companion. Review.
+27. Navidrome: remove the stale `ND_LISTENBRAINZ_*` (Maloja) settings, if the noise matters (a known leftover).
+28. **Backup failures alert nobody.** The service has no `OnFailure=`. Add an ntfy message on failure, or a healthchecks.io ping at the end of the script.
+29. Install `smartmontools` and check both USB disks (`sudo smartctl -H -d sat /dev/sda`, `/dev/sdb`). Disk health has never been checked.
+30. Do a real restore test of Vaultwarden and Nextcloud, and one file from B2. Only Navidrome has been restored so far.
+31. Leftovers: the `onedrive:` remote in `rclone.conf` still holds a token (remove it with `rclone config delete onedrive` if unneeded). Check whether the B2 bucket has a lifecycle rule ("keep only the last version"); without one, `--b2-hard-delete` still deletes, so it's fine either way.
+
+32. **Slim Nextcloud's server side** (from the 2026-10-29 replacement research; Nextcloud is kept). (a) Add Redis for file locking: two stale-lock incidents, and no Redis today. (b) Decide on the leftover connectors: `richdocumentscode` is enabled and `richdocuments`/`onlyoffice` are installed. The page says the leftovers are "kept on purpose", so ask before disabling. (c) Pin `nextcloud:latest` to the running major version, and keep it pinned. (d) Check the MariaDB version: 10.6 (unverified) isn't on Nextcloud's supported list (10.11, 11.4, 11.8, 12.3). Also check the background-jobs mode (a page gap). This doesn't fix the UI feeling heavy, which was the user's main complaint.
+
+Retracted: the "Caddy token trap". The token is in `~/docker/caddy/.env` as `DNS_TOK`, mapped to `DNS_API_TOKEN`.

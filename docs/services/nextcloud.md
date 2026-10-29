@@ -28,7 +28,7 @@ The homelab's Google Drive: file storage and sync through the web UI, the deskto
   - **CryptPad + Syncthing** was rejected. Syncthing has no official iOS app, no web file browser and no user accounts. CryptPad keeps its files encrypted in its own drive, which Syncthing can't sync, and can't open or save Office files in iOS Safari.
   - **Seafile** was rejected: its iOS app previews Office files but can't edit them.
   - **OpenCloud + Euro-Office** was the front-runner. It's open source (Apache-2.0 server, GPL apps), needs no database and has an official iOS app. It was set aside because editing from that iOS app is backed by a single user report, with no maintainer confirmation.
-  - Server-side clean-up is follow-up 32 in the plan. Source: research notes in `.scratch/research/2026-10-29-nextcloud-replacement*.md`, not committed.
+  - Server-side clean-up is follow-up 32. Source: research notes in `.scratch/research/2026-10-29-nextcloud-replacement*.md`, not committed.
 
 ## How it's set up
 
