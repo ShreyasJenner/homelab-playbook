@@ -133,6 +133,25 @@ If the compose file has a `healthcheck:` block, delete it. If not (it comes from
 
 **26. Invidious:** `grep -n -E 'registration_enabled|popular_enabled' ~/docker/invidious/docker-compose.yml`, set both to `false` once all accounts exist, then `up -d`. Companion: add `reverse_proxy /companion* localhost:8282` above the existing `reverse_proxy` in the Caddyfile's `youtube` block, then validate and reload (`docs/services/caddy.md`). Optional: playback works today.
 
+**32. Slim Nextcloud's server side.** Read-only pre-check first; it decides the rest:
+```bash
+cd ~/docker/nextcloud
+grep -n -E 'image:|REDIS' docker-compose.yml
+O="sudo docker exec -u www-data nextcloud_app php occ"
+$O status | grep -E 'versionstring|maintenance'
+$O config:system:get memcache.locking; $O config:system:get memcache.local; $O config:system:get redis
+$O config:app:get core backgroundjobs_mode
+$O app:list --enabled | grep -E 'richdocuments|onlyoffice|eurooffice'
+sudo docker exec nextcloud_db mariadb --version
+```
+Then one change per block, in this order:
+- **Pin the image** to the running major (`nextcloud:<major>`; pinning to the running version doesn't change it), and pin MariaDB to its running tag.
+- **Redis:** add a `redis` service (`redis:7-alpine`, pinned) to the stack. Point Nextcloud at it with `$O config:system:set redis host --value=redis`, `... redis port --value=6379 --type=integer` and `$O config:system:set memcache.locking --value='\OC\Memcache\Redis'`. Check: `$O config:system:get memcache.locking`, then a `files:scan` of one user. Undo: `$O config:system:delete memcache.locking`, then remove the service.
+- **Connectors:** `$O app:disable richdocumentscode` (and `richdocuments`, `onlyoffice`), only if the user agrees; the page says they're "kept on purpose". Undo: `app:enable`.
+- **MariaDB 10.6 → 10.11** (only if the pre-check shows 10.6): do it after a fresh backup and a `mariadb-dump`. Add `MARIADB_AUTO_UPGRADE=1` to `nextcloud_db`, or run `mariadb-upgrade` after the tag change. Riskiest step: last, on its own day.
+
+Check: Uptime Kuma green, a document opens in Euro-Office from the web and the iOS app, `occ status` clean. Background jobs should be `cron`; if not, decide separately.
+
 **1. Reserve the LAN address:** `ip link show wlp130s0 | awk '/ether/{print $2}'`, then reserve `198.51.100.10` for that MAC in the router.
 
 **Low priority or optional:**

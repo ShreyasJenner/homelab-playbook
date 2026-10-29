@@ -24,6 +24,11 @@ The homelab's Google Drive: file storage and sync through the web UI, the deskto
 - **MariaDB over SQLite**, which slows down as usage grows.
 - **Public through Funnel** because share links and shared-document editing must work for people who aren't on the tailnet (ADR 0004).
 - Alternatives were looked at again on 2026-09-14 (Seafile, ownCloud Infinite Scale, Pydio Cells and others), with no change.
+- **Kept again on 2026-10-29**, after a replacement search prompted by the app feeling heavy to use and the recurring server-side incidents. By then the needs were only the office suite, file sync, web and iOS apps (with **editing documents in the iOS app** as a must) and several users. Share links for outsiders, Calendar and Contacts were no longer needed.
+  - **CryptPad + Syncthing** was rejected. Syncthing has no official iOS app, no web file browser and no user accounts. CryptPad keeps its files encrypted in its own drive, which Syncthing can't sync, and can't open or save Office files in iOS Safari.
+  - **Seafile** was rejected: its iOS app previews Office files but can't edit them.
+  - **OpenCloud + Euro-Office** was the front-runner. It's open source (Apache-2.0 server, GPL apps), needs no database and has an official iOS app. It was set aside because editing from that iOS app is backed by a single user report, with no maintainer confirmation.
+  - Server-side clean-up is follow-up 32 in the plan. Source: research notes in `.scratch/research/2026-10-29-nextcloud-replacement*.md`, not committed.
 
 ## How it's set up
 
@@ -112,7 +117,8 @@ Through `stacks.sh update` (`nextcloud` is in the default list). Nextcloud doesn
 
 - **The update path is unverified.** With `:latest`, a pull can jump a major version.
 - **The background jobs mode** (AJAX, Webcron or cron) has never been checked: `occ config:app:get core backgroundjobs_mode`.
-- The `nextcloud_db` mounts and the image tags.
+- The `nextcloud_db` mounts and the image tags. If the tag is `mariadb:10.6`, it isn't on the current supported list, which starts at 10.11 (follow-up 32).
+- **No Redis**, so file locking goes through the database, which is behind the two stale-lock incidents (follow-up 32).
 
 ## Runbooks
 
