@@ -71,27 +71,30 @@ Every stack is a Compose project in `~/docker/<stack>/`, with its config and dat
 
 | Stack dir | Containers | Service pages |
 |---|---|---|
-| `actual-budget` | `actual-budget-actual_server-1` | Actual Budget |
+| `actual-budget` | `actual-budget-actual_server-1` | [Actual Budget](../services/actual-budget.md) |
 | `caddy` | `caddy` | [Caddy](../services/caddy.md) |
 | `euro-office` | `euro-office` | [Euro-Office](../services/euro-office.md) |
-| `gitea` | `gitea` | Gitea |
-| `homepage` | `homepage-homepage-a-1`, `homepage-homepage-b-1` | Homepage (one instance per User) |
+| `gitea` | `gitea` | [Gitea](../services/gitea.md) |
+| `homepage` | `homepage-homepage-a-1`, `homepage-homepage-b-1` | [Homepage](../services/homepage.md) (one instance per User) |
 | `invidious` | `invidious-invidious-1`, `invidious-companion-1`, `invidious-invidious-db-1` | [Invidious](../services/invidious.md) |
 | `jellyfin` | `jellyfin` | [Jellyfin](../services/jellyfin.md) |
 | `kavita` | `kavita` | [Kavita](../services/kavita.md) |
-| `memos` | `memos` | Memos |
-| `mindwtr` | `mindwtr-app`, `mindwtr-cloud` | Mindwtr |
+| `memos` | `memos` | [Memos](../services/memos.md) |
+| `mindwtr` | `mindwtr-app`, `mindwtr-cloud` | [Mindwtr](../services/mindwtr.md) |
 | `monitoring` | `grafana`, `prometheus`, `loki`, `alloy`, `node-exporter`, `cadvisor` | Monitoring stack |
 | `navidrome` | `navidrome` | [Navidrome](../services/navidrome.md) |
 | `nextcloud` | `nextcloud_app`, `nextcloud_db` | [Nextcloud](../services/nextcloud.md) |
 | `ntfy` | `ntfy` | ntfy |
 | `redlib` | `redlib-shreyas`, `redlib-bob` | [Redlib](../services/redlib.md) (one instance per User) |
 | `uptime-kuma` | `uptime-kuma` | Uptime Kuma |
-| `vaultwarden` | `vaultwarden` | Vaultwarden |
+| `vaultwarden` | `vaultwarden` | [Vaultwarden](../services/vaultwarden.md) |
 
-**Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik`, `collabora` ([page](../services/collabora.md)), `dailytxt`, `donetick`, `maloja` ([page](../services/maloja.md)), `materialious` ([page](../services/materialious.md)), `onlyoffice` ([page](../services/onlyoffice.md)), `paperless-ngx`, `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
+**Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik` ([page](../services/authentik.md)), `collabora` ([page](../services/collabora.md)), `dailytxt`, `donetick` ([page](../services/donetick.md)), `maloja` ([page](../services/maloja.md)), `materialious` ([page](../services/materialious.md)), `onlyoffice` ([page](../services/onlyoffice.md)), `paperless-ngx` ([page](../services/paperless-ngx.md)), `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
 
 ### Updating: `~/docker/stacks.sh`
+
+The procedure is in the runbook [Updating containers](../runbooks/updating-containers.md).
+
 
 ```
 ./stacks.sh <command> [stack ...]
@@ -106,7 +109,7 @@ Known gaps in the script (2026-10-28):
 
 ### Backups
 
-A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 02:30. It stops every stack, backs up `~/docker` plus media folders from the 4 TB disk to the restic repo on `/mnt/backup-hdd`, starts the stacks again, and then mirrors the repo to Backblaze B2. **Services, monitoring included, are down for about 3 minutes every night.**
+A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 02:30 (details on the [Restic page](../services/restic.md)). It stops every stack, backs up `~/docker` plus media folders from the 4 TB disk to the restic repo on `/mnt/backup-hdd`, starts the stacks again, and then mirrors the repo to Backblaze B2. **Services, monitoring included, are down for about 3 minutes every night.**
 
 ## Gaps
 
@@ -118,6 +121,9 @@ A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 
 - [Names don't resolve: MagicDNS and the host's DNS](../runbooks/names-dont-resolve.md)
 - [Media libraries are empty, or nothing runs, after a reboot](../runbooks/media-libraries-empty-after-reboot.md)
 - [A compose or `.env` change didn't take effect](../runbooks/compose-change-didnt-take-effect.md)
+- [Updating containers](../runbooks/updating-containers.md)
+- [The nightly backup failed](../runbooks/backup-failed.md)
+- [Restoring from the backup](../runbooks/restoring-from-backup.md)
 
 ## Incidents
 

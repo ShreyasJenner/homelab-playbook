@@ -21,6 +21,8 @@ cd ~/docker/<stack> && sudo docker compose config --quiet   # prints warnings su
 2. **The variable is unset** (a typo in `.env`, or the wrong `.env` folder), and compose silently substitutes an empty string.
 3. **A value has a leading space**: `- KEY= value` in compose makes the space part of the value.
 4. **Postgres** reads `POSTGRES_*` only when it first initialises its data. Later changes do nothing.
+5. **The app saved the setting in its own config file**, which now wins over the env var: Gitea's `app.ini` and Vaultwarden's admin-panel `data/config.json`. Changing or removing the env var doesn't change anything.
+6. **A YAML anchor merge (`<<:`) is shallow:** a service's own `environment:` replaces the anchor's instead of adding to it.
 
 ## Fix
 
@@ -29,7 +31,9 @@ cd ~/docker/<stack>
 sudo docker compose up -d          # recreates any container whose config changed
 ```
 
-For causes 2 and 3, fix the file and run `up -d` again. For cause 4, change the user or password inside Postgres, or recreate the volume (which loses the data).
+For causes 2 and 3, fix the file and run `up -d` again. For cause 4, change the user or password inside Postgres, or recreate the volume (which loses the data). For cause 5, edit the app's own config file and restart. For cause 6, merge the shared anchor inside `environment:` (as Homepage's compose does).
+
+To check what compose will substitute without printing secrets, use `sudo docker compose config --quiet`: it prints only warnings such as "variable is not set". Never paste the full `docker compose config` output: it includes every secret.
 
 ## Verify
 
