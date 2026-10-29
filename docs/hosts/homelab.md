@@ -73,7 +73,7 @@ Every stack is a Compose project in `~/docker/<stack>/`, with its config and dat
 |---|---|---|
 | `actual-budget` | `actual-budget-actual_server-1` | Actual Budget |
 | `caddy` | `caddy` | [Caddy](../services/caddy.md) |
-| `euro-office` | `euro-office` | Euro-Office |
+| `euro-office` | `euro-office` | [Euro-Office](../services/euro-office.md) |
 | `gitea` | `gitea` | Gitea |
 | `homepage` | `homepage-homepage-a-1`, `homepage-homepage-b-1` | Homepage (one instance per User) |
 | `invidious` | `invidious-invidious-1`, `invidious-companion-1`, `invidious-invidious-db-1` | Invidious |
@@ -83,13 +83,13 @@ Every stack is a Compose project in `~/docker/<stack>/`, with its config and dat
 | `mindwtr` | `mindwtr-app`, `mindwtr-cloud` | Mindwtr |
 | `monitoring` | `grafana`, `prometheus`, `loki`, `alloy`, `node-exporter`, `cadvisor` | Monitoring stack |
 | `navidrome` | `navidrome` | Navidrome |
-| `nextcloud` | `nextcloud_app`, `nextcloud_db` | Nextcloud |
+| `nextcloud` | `nextcloud_app`, `nextcloud_db` | [Nextcloud](../services/nextcloud.md) |
 | `ntfy` | `ntfy` | ntfy |
 | `redlib` | `redlib-shreyas`, `redlib-bob` | Redlib (one instance per User) |
 | `uptime-kuma` | `uptime-kuma` | Uptime Kuma |
 | `vaultwarden` | `vaultwarden` | Vaultwarden |
 
-**Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik`, `collabora`, `dailytxt`, `donetick`, `maloja`, `materialious`, `onlyoffice`, `paperless-ngx`, `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
+**Leftovers in `~/docker`** (recorded, not cleaned up): stack folders for retired, evaluated or never-run services (`authentik`, `collabora` ([page](../services/collabora.md)), `dailytxt`, `donetick`, `maloja`, `materialious`, `onlyoffice` ([page](../services/onlyoffice.md)), `paperless-ngx`, `tududi`), `venv/`, `service-list.txt`, and a top-level `docker-compose.yml`.
 
 ### Updating: `~/docker/stacks.sh`
 

@@ -2,7 +2,7 @@
 
 - **Date:** recorded and fixed 2026-10-28; the break happened before that (exact day unknown: shell history has no timestamps)
 - **Status:** resolved
-- **Service:** Euro-Office (and Nextcloud document editing, which depends on it)
+- **Service:** [Euro-Office](../services/euro-office.md) (and [Nextcloud](../services/nextcloud.md) document editing, which depends on it)
 - **Runbook:** [A service URL returns 502 or closes the connection](../runbooks/service-url-returns-502.md). Rerunnable check: `docs/runbooks/euro-office-check.sh`
 
 ## Symptom
