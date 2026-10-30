@@ -110,6 +110,10 @@ grep -n -A6 'healthcheck' docker-compose.yml
 ```
 If the compose file has a `healthcheck:` block, delete it. If not (it comes from the image), add `healthcheck: { disable: true }` to both services. Then `sudo docker compose up -d`, and check that `sudo docker ps --filter name=redlib` shows no "(unhealthy)".
 
+**33. Redlib on the published image** (after the home-IP block lifts; pairs well with 20/25, same file). Back up the compose file, set the anchor's `image:` to `quay.io/redlib/redlib:latest`, delete the `build:` block and both `pull_policy:` lines, then `sudo docker compose pull && sudo docker compose up -d`. Check: `sudo docker exec redlib-shreyas redlib --version` is 0.40.0 or later, and `curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8943/r/selfhosted` is `200`. Then `sudo docker image rm redlib-local:latest`, and update the service page's Updating section and the runbook (no more "never pull"). Undo: restore the `.bak`, then `build --no-cache` and `up -d`.
+
+**34. CGNAT check** (no change, a fact to record). On the server, `curl -s https://ifconfig.me; echo`; in the ISP's app, the WAN/Internet IP. Compare them by eye and don't paste either one. The same means a public IPv4 (no CGNAT); a `100.64.x.x`–`100.127.x.x` WAN address means CGNAT.
+
 **11. More Kuma monitors** (tick "Kuma Alert" on each):
 - `https://drive.example.com/status.php`
 - `https://gitea.example.com/api/healthz`
