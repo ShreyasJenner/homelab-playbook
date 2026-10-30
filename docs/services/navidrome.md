@@ -19,6 +19,8 @@ Streams the music library to the browser and to phones through Subsonic clients.
 
 Lightweight, music-only, and it speaks the Subsonic API, so many iOS clients work with it (play:Sub, Substreamer, Amperfy). It was compared with Jellyfin on 2026-07-18 and kept for music. [Jellyfin](jellyfin.md) came later for video only.
 
+Synced lyrics (`.lrc` files next to the tracks) were researched on 2026-10-30: [Research: synced lyrics](../research/synced-lyrics.md).
+
 ## How it's set up
 
 - Image `deluan/navidrome:latest`, port `4533`, networks `navidrome_default` and `music`. `music` is a leftover from Maloja; nothing else is on it.
