@@ -11,6 +11,7 @@ docs/
   runbooks/
   incidents/  YYYY-MM-DD-slug.md
   adr/
+  research/   <topic>.md, one note per question researched
 ```
 
 **Service page** header block:
