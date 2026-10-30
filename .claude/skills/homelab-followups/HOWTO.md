@@ -101,18 +101,6 @@ Check: log in, and the subscriptions are there. Once a backup has run, `sudo doc
 
 ## 3. Maintenance
 
-**12. `stacks.sh` and disk space.**
-```bash
-cp -p ~/docker/stacks.sh ~/docker/stacks.sh.bak-20261028
-grep -n 'DEFAULT_STACKS' ~/docker/stacks.sh
-nano ~/docker/stacks.sh            # add gitea vaultwarden
-~/docker/stacks.sh list
-sudo docker system df
-sudo docker image prune -a         # every image no container uses; asks first
-sudo docker builder prune
-```
-Then update Vaultwarden (`docs/runbooks/updating-containers.md`).
-
 **15. Uncapped container logs:** `loki-storage-check.sh` lists them, and each one is fixed when it's next recreated (item 4's `up -d` covers most). Optional, untested: persistent Alloy storage. Add `--storage.path=/var/lib/alloy/data` to its `command:` and the volume `./alloy/data:/var/lib/alloy/data`, run `mkdir -p ~/docker/monitoring/alloy/data`, then `sudo docker compose up -d alloy`. The next morning, `sudo docker logs alloy --since 6h 2>&1 | grep -c 'no retries left'` should be about 0.
 
 **20/25. Redlib healthcheck.**

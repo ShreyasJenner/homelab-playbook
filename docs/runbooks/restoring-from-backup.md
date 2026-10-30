@@ -51,7 +51,7 @@ Vaultwarden: restore under the same `DOMAIN`, and test over HTTPS (a plain `http
    - ufw rules
    - Tailscale login with the same machine name, plus the three Serve/Funnel entries ([Tailscale page](../services/tailscale.md#serve-and-funnel-entries))
    - the router's address for the server (the Euro-Office connector depends on the LAN address)
-6. `cd ~/docker && ./stacks.sh up`, plus `gitea` and `vaultwarden` by name.
+6. `cd ~/docker && ./stacks.sh up` (the default list has every live stack since 2026-10-30).
 7. Rebuild Invidious's database (it isn't in the backup), and rebuild the Redlib image.
 
 ## Related incidents

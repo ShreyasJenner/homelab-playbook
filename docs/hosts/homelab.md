@@ -100,12 +100,13 @@ The procedure is in the runbook [Updating containers](../runbooks/updating-conta
 ./stacks.sh <command> [stack ...]
 ```
 
-Commands: `up` (`up -d`), `stop`, `down`, `restart` (doesn't pick up compose changes; use `up`), `pull`, `update` (`pull`, then `up -d`), `ps`, `logs` (`-f --tail 50`), `list`. With no stack names it acts on the `DEFAULT_STACKS` list in the script. A stack that fails prints `!! <stack> failed` and the loop carries on; the exit code is 1 if anything failed.
+Commands: `up` (`up -d`), `stop`, `down`, `restart` (doesn't pick up compose changes; use `up`), `pull`, `update` (`pull`, then `up -d`; after the loop, `docker image prune -f`), `ps`, `logs` (`-f --tail 50`), `list`. With no stack names it acts on the `DEFAULT_STACKS` list in the script. A stack that fails prints `!! <stack> failed` and the loop carries on; the exit code is 1 if anything failed.
 
-Known gaps in the script (2026-10-28):
-- **`gitea` and `vaultwarden` aren't in `DEFAULT_STACKS`**, so a plain `./stacks.sh update` never updates them. Name them explicitly until the list is fixed.
-- **`update` never removes old images.** On 2026-10-28 Docker held 51 GB of reclaimable images and 17 GB of build cache (`sudo docker system df`).
+Since 2026-10-30 (follow-up 12, verified that day), `DEFAULT_STACKS` holds every live stack (17, with `gitea` and `vaultwarden` added; `materialious` is commented out). The same day, unused images (51 GB) and build cache (20 GB) were pruned: `/` went from 170 GB to 104 GB used. The leftover stack folders above no longer have images.
+
+Known gaps in the script:
 - Almost every image follows `latest` (Gitea is pinned), so an update can pull a release with breaking config changes.
+- The prune only takes dangling images. Images of stacks that were stopped for good stay until `sudo docker image prune -a`.
 
 ### Backups
 

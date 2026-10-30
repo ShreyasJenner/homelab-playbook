@@ -27,6 +27,7 @@ It was on the original wish list for the server. On 2026-06-27 it was compared w
 - **`ADMIN_TOKEN` is set in `.env`, so the admin panel (`/admin`) is enabled.** The token is an Argon2 hash; keep it single-quoted in `.env` because of its `$` signs. There's no `data/config.json`. Settings saved in the admin panel would go there and override the env vars.
 - **Data** is a bind mount, `~/docker/vaultwarden/data`, so restic backs it up (a cold copy at 02:30).
 - Uptime Kuma checks `http://localhost:9734/alive`, with ntfy alerts.
+- **Updates** come through a plain `stacks.sh update`: it's in `DEFAULT_STACKS` since 2026-10-30 (follow-up 12, done). That day's update found nothing newer: the container runs 1.37.4 (image built 2026-10-05), the current `latest`. Verified 2026-10-30.
 
 ### Clients
 
@@ -37,7 +38,6 @@ It was on the original wish list for the server. On 2026-06-27 it was compared w
 
 - **`DOMAIN` is still the old `https://homelab.tail0000.ts.net:9758`.** That's the pre-Caddy address, and its port isn't even the real one. Vaultwarden uses `DOMAIN` for WebAuthn/passkeys, attachment links, email links and the admin page. Set it to `https://vault.example.com`, then `sudo docker compose up -d` (follow-up 16). Do this before using a passkey or security key for 2FA.
 - **2FA is off** on the vault account (follow-up 22).
-- **Not in `stacks.sh`'s default list**, so it hasn't been updated since 2026-10-15 (follow-up 12). Update it by name: `~/docker/stacks.sh update vaultwarden`.
 - **The restic password must not live only in Vaultwarden.** Restoring Vaultwarden needs the restic password, so that would be circular (follow-up 5).
 
 ## Runbooks
