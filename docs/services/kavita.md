@@ -8,7 +8,7 @@ URL:        https://manga.example.com
 Config:     ~/docker/kavita/ (docker-compose.yml, .env, config/)
 Depends on: media/manga and media/lns on the 4 TB HDD
 Per-User:   no; one instance, an account per User
-Verified:   2026-10-28
+Verified:   2026-10-30
 ```
 
 ## What it's for
@@ -42,3 +42,4 @@ Compared with Komga, Stump, Mango and Atsumeru on 2026-08-15. Kavita handles man
 ## Incidents
 
 - [2026-10-02: media libraries empty after the HDD mounted late](../incidents/2026-10-02-media-libraries-empty-after-late-hdd-mount.md)
+- [2026-10-30: slow to open manga under heavy traffic (server's Wi-Fi downlink at 7.3 Mbit/s)](../incidents/2026-10-30-server-wifi-downlink-stuck-at-mcs0.md)

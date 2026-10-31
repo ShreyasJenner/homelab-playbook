@@ -11,7 +11,7 @@ Login:      alice, SSH on port 2207
 Tailnet:    homelab.tail0000.ts.net, 192.0.2.10
 LAN:        198.51.100.10 (DHCP over Wi-Fi, not reserved)
 Config:     ~/docker/<stack>/ (one Compose project per stack)
-Verified:   2026-10-28
+Verified:   2026-10-30
 ```
 
 ## What it's for
@@ -36,9 +36,11 @@ fstab mounts everything by UUID, so it doesn't matter which disk comes up as `sd
 
 ## Network
 
-- **Wi-Fi only** (`wlp130s0`), DHCP from the router at `198.51.100.1`. The Ethernet port `enp131s0` is unavailable. `/etc/systemd/network/20-wired.network` exists but nothing uses it. NetworkManager manages the connection.
-- **The LAN address isn't reserved in the router**, so it can change on any DHCP renewal. It changed once already (2026-09-12). Nextcloud and Euro-Office call each other on this address, and Nextcloud's `trusted_domains` includes it, so a change breaks document editing.
-- **DNS:** `/etc/resolv.conf` is a plain file with `nameserver 100.100.100.100` (Tailscale) and `nameserver 8.8.8.8`. `/etc/dhcpcd.conf` still has `nohook resolv.conf`, a leftover from the 2026-07-21 DNS fix; dhcpcd itself is inactive.
+- **Wi-Fi only** (`wlp130s0`), DHCP from the ISP's router at `198.51.100.1`. NetworkManager manages the connection (`HomeWiFi`). The Ethernet port `enp131s0` can't be used: there's no space to run a cable to the router (user, 2026-10-30). `/etc/systemd/network/20-wired.network` exists but nothing uses it.
+- **The Wi-Fi link** (verified 2026-10-30): Realtek `rtw89_8852be`, 5 GHz (5200 MHz), 80 MHz, Wi-Fi 6, 1200.9 Mbit/s each way when healthy. Signal is very strong, about `-31` to `-34 dBm` (the server is close to the router). Power save is on (NetworkManager's default). `iw` is installed for reading the rates: `iw dev wlp130s0 link`. **The router once got stuck sending to the server at 7.3 Mbit/s (HE-MCS 0)**, which made everything slow under heavy traffic; a Wi-Fi reconnect fixed it ([incident](../incidents/2026-10-30-server-wifi-downlink-stuck-at-mcs0.md)).
+- **There's no admin access to the router** (user, 2026-10-30), so nothing can be configured on it: no DHCP reservation, no port forwards.
+- **The LAN address isn't reserved in the router** and can't be (see above), so it can change on any DHCP renewal. It changed once already (2026-09-12). Nextcloud and Euro-Office call each other on this address, and Nextcloud's `trusted_domains` includes it, so a change breaks document editing.
+- **DNS:** `/etc/resolv.conf` is a plain file with `nameserver 100.100.100.100` (Tailscale) and `nameserver 8.8.8.8`. `/etc/dhcpcd.conf` still has `nohook resolv.conf`, a leftover from the 2026-07-21 DNS fix; dhcpcd itself is inactive. On 2026-10-30, `100.100.100.100` answered `SERVFAIL` for a public name (`manga.example.com`), so public lookups on the server actually go to `8.8.8.8`.
 - **[Tailscale](../services/tailscale.md)** gives the host its tailnet name and address. Under ADR 0004 every service is reached through Caddy on the tailnet, apart from three Tailscale Serve/Funnel entries:
 
   | Entry | Target | Exposure |
@@ -129,6 +131,7 @@ A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 
 ## Incidents
 
 - [Tailnet-only services are reachable from the home LAN](../incidents/2026-10-28-services-reachable-from-home-lan.md) (open)
+- [2026-10-30: everything slow under heavy traffic: the router sent to the server at 7.3 Mbit/s](../incidents/2026-10-30-server-wifi-downlink-stuck-at-mcs0.md) (resolved)
 - [Euro-Office broken after switching it to Funnel](../incidents/2026-10-28-euro-office-broken-after-funnel-switch.md) (resolved)
 - [2026-09-10: server offline after moving to a new network](../incidents/2026-09-10-server-offline-after-network-move.md) (resolved)
 - [2026-07-21: Tailscale and dhcpcd fought over the server's DNS](../incidents/2026-07-21-server-dns-fight-with-dhcpcd.md) (resolved)

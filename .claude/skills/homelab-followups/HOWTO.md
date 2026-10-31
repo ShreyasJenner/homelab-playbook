@@ -144,7 +144,34 @@ Then one change per block, in this order:
 
 Check: Uptime Kuma green, a document opens in Euro-Office from the web and the iOS app, `occ status` clean. Background jobs should be `cron`; if not, decide separately.
 
-**1. Reserve the LAN address:** `ip link show wlp130s0 | awk '/ether/{print $2}'`, then reserve `198.51.100.10` for that MAC in the router.
+**1. Reserve the LAN address:** blocked, no admin access to the router (2026-10-30). Do 37 instead.
+
+**37. Nextcloud ↔ Euro-Office off the LAN address.** Read-only first (`-o` prints only the match):
+```bash
+sudo grep -rno '198\.51\.100\.10[:0-9]*' ~/docker/nextcloud ~/docker/euro-office --include='*.yml' --include='.env' --include='*.json' 2>/dev/null | sort -u
+O="sudo docker exec -u www-data nextcloud_app php occ"
+$O config:system:get trusted_domains
+$O config:app:get eurooffice DocumentServerInternalUrl; $O config:app:get eurooffice StorageUrl
+sudo docker exec nextcloud_app curl -s -o /dev/null -w '%{http_code}\n' http://192.0.2.10:9917/healthcheck
+sudo docker exec euro-office curl -s -o /dev/null -w '%{http_code}\n' http://192.0.2.10:8080/status.php
+```
+If both calls return `200`, the tailnet IP works from inside the containers: add `192.0.2.10` to `trusted_domains` (it's there with `:8080` already; check whether the port matters), then set both internal URLs to `http://192.0.2.10:<port>/` in Nextcloud's Euro-Office settings. The app id may not be `eurooffice`; read it from `app:list` first. Check: a document opens from the web and the iOS app. Undo: set the URLs back to `http://198.51.100.10:<port>/`. Follow `docs/runbooks/document-editing-broke-after-lan-ip-change.md` if it breaks.
+
+**35. Detect a stuck Wi-Fi downlink.** Simplest first: an Uptime Kuma **Ping** monitor on `198.51.100.1`, retries 3, with "Kuma Alert" ticked. Kuma doesn't alert on latency alone, so also add a timer script, for example `/usr/local/sbin/wifi-rate-check.sh` every 5 minutes:
+```bash
+#!/bin/sh
+# Alert when the router -> server Wi-Fi rate is stuck low (2026-10-30 incident)
+r=$(iw dev wlp130s0 link | awk '/rx bitrate/{print int($3)}')
+[ -n "$r" ] && [ "$r" -lt 50 ] && curl -s -d "homelab Wi-Fi rx bitrate ${r} Mbit/s; reconnect Wi-Fi" https://ntfyhub.example.com/<TOPIC>
+```
+`rx bitrate` is the rate of the last received frame, so it can dip briefly; alert only after two low readings in a row, or reconnect automatically (`nmcli connection down HomeWiFi; sleep 3; nmcli connection up HomeWiFi`) once the alert has proved reliable. The ntfy topic and token are in ntfy's config; don't print them. Check: the script stays quiet while `rx bitrate` is in the hundreds.
+
+**36. MagicDNS SERVFAIL on the server.** Read-only:
+```bash
+for n in manga.example.com example.com homelab.tail0000.ts.net; do echo "$n: $(dig @100.100.100.100 $n +tries=1 +time=3 | grep -o 'status: [A-Z]*')"; done
+tailscale dns status 2>/dev/null | head -30
+```
+If every public name fails, the tailnet has no global nameserver or MagicDNS forwarding is broken: check DNS in the Tailscale admin console. If only `example.com` fails, look for a split-DNS entry for that domain.
 
 **Low priority or optional:**
 - 17: Mindwtr CORS origin → `https://task.example.com`, only if the browser app is used.
