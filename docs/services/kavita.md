@@ -8,7 +8,7 @@ URL:        https://manga.example.com
 Config:     ~/docker/kavita/ (docker-compose.yml, .env, config/)
 Depends on: media/manga and media/lns on the 4 TB HDD
 Per-User:   no; one instance, an account per User
-Verified:   2026-10-30
+Verified:   2026-10-31
 ```
 
 ## What it's for
@@ -30,6 +30,7 @@ Compared with Komga, Stump, Mango and Atsumeru on 2026-08-15. Kavita handles man
   | `/mnt/hdd-4tb/media/manga` | `/manga` |
   | `/mnt/hdd-4tb/media/lns` | `/lns` |
 
+- **Folder Watching is on** (Settings → General; it was off until 2026-10-31). New files are picked up within minutes without a manual scan: Tanya showed up under "Recently updated" on 2026-10-31. Per-library overrides were never touched.
 - **Uploads from a phone** go through [Nextcloud](nextcloud.md)'s external storage (`/mnt/manga`), which needed write access for Nextcloud's uid 33 on the manga folder.
 - Layout: one folder per series, volumes as CBZ. Libraries are of type Manga, pointed at `/manga` and `/lns`.
 - `media/manga` and `media/lns` are in the nightly backup.
