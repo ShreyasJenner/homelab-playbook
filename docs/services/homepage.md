@@ -35,7 +35,7 @@ It came out of the Authentik dead end (2026-10-11). The wish was "a sort of home
 - Every tile's `href` is `https://<name>.example.com`, and every `siteMonitor` is `http://localhost:<port>`. Because Homepage is on the host network, it checks the same ports Caddy uses. Nextcloud's monitor uses `/status.php`, because `/` returns 500 to a check.
 - No widgets, so no API keys in the config.
 - YAML edits apply on a page refresh. Compose or `.env` changes need `sudo docker compose up -d`.
-- `services.yaml` layout: groups at column 0, services indented 4 spaces, fields 8. Spaces only.
+- `services.yaml` layout: groups at column 0, each service as `  - <name>:` (2 spaces, then the dash), and its fields at 6 spaces. Spaces only. (Seen in `config_a` on 2026-11-01; the page used to say 4 and 8.)
 
 ## Gaps
 

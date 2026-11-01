@@ -3,7 +3,7 @@
 - **Date:** 2026-09-04
 - **Status:** resolved
 - **Service:** Jellyfin
-- **Runbook:** [Jellyfin shows wrong or missing episodes](../runbooks/jellyfin-wrong-episode-metadata.md)
+- **Runbook:** [Jellyfin shows wrong or missing episodes](../runbooks/jellyfin-wrong-episode-metadata.md), [A container says a media file is missing](../runbooks/media-file-missing-in-container.md)
 - **Source:** chat "Jellyfin symlinks configuration" (2026-09-04). Unverified.
 
 ## Symptom

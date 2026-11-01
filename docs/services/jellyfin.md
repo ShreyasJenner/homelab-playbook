@@ -27,7 +27,7 @@ For watching movies. [Navidrome](navidrome.md) stays the music server; Jellyfin 
   - `/mnt/hdd-4tb/media/{anime,anime_movies,tv_shows,movies}`
 
   An absolute symlink only resolves inside a container if its target exists there at the same path. That's why the folders are mounted at their host paths, and **library paths in Jellyfin must be these full paths**, not `/media` ([2026-09-04](../incidents/2026-09-04-jellyfin-symlinked-show-not-found.md)).
-- **TV and anime are hardlinks** (converted from symlinks on 2026-10-22). **`media/movies` still has 12 symlinks**.
+- **TV and anime are hardlinks** (converted from symlinks on 2026-10-22), and so are movies and anime movies since 2026-11-01, when the 13 symlinks were converted.
 - **Naming:** series folders `<Title> (<Year>) [tvdbid-<id>]`, seasons `Season 01`, episodes `… - S01E01 - …`. Jellyfin matches on `SxxExx` and the `[tvdbid-…]` tag.
 - **The TheTVDB plugin is installed** (`config/plugins/TheTVDB_24.0.0.0`), for anime episode numbering.
 - Uptime Kuma checks `http://localhost:8167/health`.
@@ -41,6 +41,7 @@ For watching movies. [Navidrome](navidrome.md) stays the music server; Jellyfin 
 
 - [Jellyfin shows wrong or missing episodes](../runbooks/jellyfin-wrong-episode-metadata.md)
 - [Media libraries are empty, or nothing runs, after a reboot](../runbooks/media-libraries-empty-after-reboot.md)
+- [A container says a media file is missing](../runbooks/media-file-missing-in-container.md)
 
 ## Incidents
 
