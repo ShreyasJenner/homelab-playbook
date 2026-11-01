@@ -1,6 +1,6 @@
 # The nightly backup failed
 
-Nothing alerts on a failed run yet, so this usually starts from a manual check.
+Nothing alerts on a failed run yet, so this usually starts from a manual check. If the run succeeded but kept the services down for a long time, see [The nightly backup took long](backup-took-long.md).
 
 ## Symptom
 
@@ -13,7 +13,7 @@ Nothing alerts on a failed run yet, so this usually starts from a manual check.
 ```bash
 systemctl list-timers restic-docker-backup.timer --no-pager
 systemctl status restic-docker-backup.service --no-pager | head -8
-journalctl -u restic-docker-backup.service --since -1d --no-pager | grep -E '\[20|ERROR|WARNING|error' | tail -20
+sudo journalctl -u restic-docker-backup.service --since -1d --no-pager | grep -E '\[20|ERROR|WARNING|error' | tail -20
 findmnt /mnt/backup-hdd; ls -la /mnt/backup-hdd/.backup-drive
 R="sudo restic -r /mnt/backup-hdd/restic-repo --password-file /root/.config/restic/password"
 $R snapshots --compact | tail -3

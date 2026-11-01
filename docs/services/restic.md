@@ -9,7 +9,7 @@ Units:      restic-docker-backup.timer → restic-docker-backup.service (/etc/sy
 Repo:       /mnt/backup-hdd/restic-repo (1 TB USB backup disk), mirrored to B2 bucket restic-backups
 Secrets:    restic password: /root/.config/restic/password (600, root); B2 key: rclone.conf (see below)
 Depends on: the backup disk mounted with its .backup-drive marker; the 4 TB disk (media paths); rclone and B2
-Verified:   2026-10-28
+Verified:   2026-11-01
 ```
 
 ## What it's for
@@ -19,7 +19,7 @@ A nightly, versioned, encrypted backup of everything needed to rebuild the homel
 ## Why this one
 
 - **Restic rather than an rsync mirror:** a mirror copies deletions straight away and keeps no history. Restic keeps deduplicated, encrypted snapshots with retention, and preserves owners, permissions and symlinks. Borg would have done as well.
-- **Stop the containers rather than dump each database:** one loop covers every stack and every database engine (MariaDB, Postgres, SQLite), and copying a live database directory can give a corrupt copy. The price is about 3–4 minutes of downtime each night.
+- **Stop the containers rather than dump each database:** one loop covers every stack and every database engine (MariaDB, Postgres, SQLite), and copying a live database directory can give a corrupt copy. The price is downtime each night: about 3–4 minutes, but **as long as restic takes to read the media**, because the media is backed up while the stacks are stopped too (1 h 15 min on 2026-11-01; see Known gaps).
 - **What's included:** `~/docker`, music, light novels and manga. **TV, anime and movies are left out on purpose:** they're too large for the 1 TB disk.
 - **B2 rather than OneDrive** for the offsite copy: OneDrive didn't have the space. B2 is pay-as-you-go.
 - **Mirror the repo with rclone** rather than keep a second restic repo: the repo already existed on the disk. The mirror only runs if `restic check` passes, so a corrupt local repo isn't copied over the good offsite one.
@@ -39,7 +39,7 @@ The timer fires at 02:30 (with up to 10 minutes of random delay; `Persistent=tru
      --host homelab --tag docker --exclude-caches --exclude-if-present .nobackup
    ```
    Exit code 3 (some files unreadable) counts as a warning.
-5. **Starts the projects again** straight away.
+5. **Starts the projects again** straight away (`start_all`, line 70, verified 2026-11-01), before retention and the check.
 6. **Applies retention:** `forget --prune --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --keep-yearly 1`.
 7. **Checks the repo:** `restic check` every night, and on Sundays re-reads 5% of the data.
 8. **Mirrors to B2**, only if the check passed: `rclone sync` to `backblaze:restic-backups` with `--b2-hard-delete`, under a lock so two syncs can't overlap.
@@ -52,10 +52,10 @@ The timer fires at 02:30 (with up to 10 minutes of random delay; `Persistent=tru
 - **The B2 application key:** in `/home/alice/.config/rclone/rclone.conf` (remote `backblaze`), restricted to the one bucket. The file also still holds an old `onedrive` remote and token.
 - The repo itself contains every `.env` file, encrypted by restic.
 
-### State on 2026-10-28
+### State on 2026-11-01
 
-- 9 snapshots (2026-10-11 to 2026-10-28), latest 230.6 GiB.
-- Repo 207 GB on the 916 GB backup disk (24% used).
+- 10 snapshots (2026-10-11 to 2026-11-01), latest 392.7 GiB (up from 270.1 GiB the night before; only 24 GiB was new data).
+- On 2026-10-28: repo 207 GB on the 916 GB backup disk (24% used).
 - B2 has space alerts, but no cap.
 - The latest snapshot contains the data of Nextcloud, Vaultwarden, Gitea, Memos, Mindwtr, Actual Budget, Uptime Kuma and ntfy.
 
@@ -67,8 +67,10 @@ The repository and password only exist inside the script, so pass them every tim
 R="sudo restic -r /mnt/backup-hdd/restic-repo --password-file /root/.config/restic/password"
 $R snapshots --compact
 $R ls latest /home/alice/docker/<stack>
-journalctl -u restic-docker-backup.service --since today --no-pager | tail -20
+sudo journalctl -u restic-docker-backup.service --since today --no-pager | tail -20
 ```
+
+`journalctl` needs `sudo` here: without it, it prints only a hint and no lines.
 
 ## What isn't backed up
 
@@ -78,6 +80,7 @@ journalctl -u restic-docker-backup.service --since today --no-pager | tail -20
 
 ## Known gaps
 
+- **Every service stays down while restic reads the media.** On a quiet night that's 3–4 minutes. After a lot of new manga, LNs or music, or when files turn up at paths restic hasn't seen (renames, moves, the 2026-10-31 symlink-to-hardlink conversion), it's much longer: 16 min on 2026-10-31, 1 h 15 min on 2026-11-01. Anything over a few minutes sets off the healthchecks.io email. Fix: back up the media with the stacks running (follow-up 40).
 - **A failed run alerts nobody.** The service has no `OnFailure=`, and nothing pings ntfy or healthchecks.io (follow-up 28).
 - **Only one restore has been tested** (Navidrome, 2026-10-15). Not Vaultwarden, not Nextcloud, nothing from B2 (follow-up 30).
 - Disk health (SMART) has never been checked; `smartmontools` isn't installed (follow-up 29).
@@ -85,6 +88,7 @@ journalctl -u restic-docker-backup.service --since today --no-pager | tail -20
 ## Runbooks
 
 - [The nightly backup failed](../runbooks/backup-failed.md)
+- [The nightly backup took long](../runbooks/backup-took-long.md)
 - [Restoring from the backup](../runbooks/restoring-from-backup.md)
 
 ## Incidents
@@ -93,3 +97,4 @@ journalctl -u restic-docker-backup.service --since today --no-pager | tail -20
 - [2026-10-11: backup aborted, drive marker missing](../incidents/2026-10-11-backup-aborted-missing-drive-marker.md)
 - [2026-10-11: restore test gave an empty compose file](../incidents/2026-10-11-restore-test-empty-compose-file.md)
 - [2026-10-22: rclone sync to B2 denied](../incidents/2026-10-22-rclone-sync-permission-denied.md)
+- [2026-11-01: backup kept every service down for 1 h 15 min](../incidents/2026-11-01-backup-downtime-after-hardlink-conversion.md)

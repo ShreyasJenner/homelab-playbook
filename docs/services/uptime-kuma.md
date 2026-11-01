@@ -41,7 +41,7 @@ All HTTP, all every 60 s, all against `localhost`, all with the "Kuma Alert" ntf
 | Vaultwarden | `http://localhost:9734/alive` |
 | Healthcheck | `<HEALTHCHECKS_PING_URL>` (an `hc-ping.com` URL) |
 
-- **"Healthcheck"** is a dead-man's switch. Kuma pings healthchecks.io, and if the pings stop (the host, Kuma or the home internet is down), healthchecks.io **emails** the user. It's the one alert that needs neither ntfy nor Tailscale. Kuma pings every 60 s (`kuma.db`, 2026-10-28). Per the user, healthchecks.io waits through 2 more missed 3-minute periods before it mails, so the nightly 3–4 minute backup stop doesn't set it off. The 3 minutes is presumably the period set on healthchecks.io; check there before relying on the exact timing. The ping URL is a credential; the real value is in the monitor's settings in Kuma (`kuma.db`).
+- **"Healthcheck"** is a dead-man's switch. Kuma pings healthchecks.io, and if the pings stop (the host, Kuma or the home internet is down), healthchecks.io **emails** the user. It's the one alert that needs neither ntfy nor Tailscale. Kuma pings every 60 s (`kuma.db`, 2026-10-28). Per the user, healthchecks.io waits through 2 more missed 3-minute periods before it mails, so the nightly 3–4 minute backup stop doesn't set it off. The 3 minutes is presumably the period set on healthchecks.io; check there before relying on the exact timing. On 2026-11-01 the "down" email came at 02:40, only about 3 minutes after Kuma stopped (02:37:16), which suggests a shorter grace than that (follow-up 41). **A long backup does set it off:** the email then means the stacks are still stopped for the backup, not that the host is down ([incident](../incidents/2026-11-01-backup-downtime-after-hardlink-conversion.md)). The ping URL is a credential; the real value is in the monitor's settings in Kuma (`kuma.db`).
 - There's also an empty **"Homelab"** group (URL placeholder `https://`).
 
 **Adding a monitor:** use the service's health endpoint on its host port, not `/` (which often redirects to a login page). Known endpoints for services not yet monitored: Memos `/healthz` (9418), ntfy `/v1/health` (10230), Euro-Office `/healthcheck` (9917). For others, the image's Dockerfile `HEALTHCHECK` usually names one. Then tick "Kuma Alert" under Notifications. It isn't the default, so a new monitor has **no alert until you tick it**. (On 2026-10-28 Vaultwarden turned out to be unticked, and was fixed.)
@@ -53,7 +53,7 @@ One notification provider, **"Kuma Alert"** (type ntfy), publishes to the ntfy s
 ## Known gaps
 
 - **It only checks `localhost`** (follow-up 11). A broken Caddy route, an expired certificate, or Tailscale or DNS failures all leave every monitor green. And Gitea, Memos, Homepage, Euro-Office, Redlib, Invidious, ntfy itself and the monitoring stack aren't monitored at all. Consider monitors on the real `https://<name>.example.com` URLs (the host can reach them).
-- **Nothing is checked from 02:30 to about 02:34** every night. The backup stops Kuma and ntfy along with everything else. There are no false alerts, but nothing is caught either.
+- **Nothing is checked from 02:30 to about 02:34** every night, or until the backup finishes when it runs long. The backup stops Kuma and ntfy along with everything else. Nothing is caught in that window, and a long backup sets off the healthchecks.io email.
 - **Backup failures don't reach Kuma** (follow-up 28).
 
 ## Runbooks
@@ -64,3 +64,4 @@ One notification provider, **"Kuma Alert"** (type ntfy), publishes to the ntfy s
 ## Incidents
 
 - [2026-08-19: Nextcloud monitor down although Nextcloud worked](../incidents/2026-08-19-uptime-kuma-nextcloud-false-down.md)
+- [2026-11-01: healthcheck "down" for 1 h 12 min while the backup ran](../incidents/2026-11-01-backup-downtime-after-hardlink-conversion.md)

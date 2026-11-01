@@ -112,7 +112,7 @@ Known gaps in the script:
 
 ### Backups
 
-A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 02:30 (details on the [Restic page](../services/restic.md)). It stops every stack, backs up `~/docker` plus media folders from the 4 TB disk to the restic repo on `/mnt/backup-hdd`, starts the stacks again, and then mirrors the repo to Backblaze B2. **Services, monitoring included, are down for about 3 minutes every night.**
+A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 02:30 (details on the [Restic page](../services/restic.md)). It stops every stack, backs up `~/docker` plus media folders from the 4 TB disk to the restic repo on `/mnt/backup-hdd`, starts the stacks again, and then mirrors the repo to Backblaze B2. **Services, monitoring included, are down for about 3 minutes every night, and for much longer after a lot of new media** (1 h 15 min on 2026-11-01), because the media is read while the stacks are stopped (follow-up 40).
 
 ## Gaps
 
@@ -126,6 +126,7 @@ A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 
 - [A compose or `.env` change didn't take effect](../runbooks/compose-change-didnt-take-effect.md)
 - [Updating containers](../runbooks/updating-containers.md)
 - [The nightly backup failed](../runbooks/backup-failed.md)
+- [The nightly backup took long](../runbooks/backup-took-long.md)
 - [Restoring from the backup](../runbooks/restoring-from-backup.md)
 
 ## Incidents
