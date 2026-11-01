@@ -17,6 +17,7 @@ The output is one **note** per topic at `docs/research/<topic-slug>.md`, for exa
 4. **Grill on the findings.** Read the note. Summarise the answer in a few lines, then run another `grilling` round on what the findings changed: candidates to drop or add, criteria to reweight, new questions the findings raised, and claims to check more closely. Add the user's answers to the note's Brief section. If anything is left that needs more research, go back to step 3 with the changed brief. Done when the user says the research is finished.
 5. **Link and check.** Link the note from each service page it's about, in that page's "Why this one" section. Run `bash .claude/skills/homelab-playbook/check-links.sh`. Done when it prints nothing.
 6. **Pause, then commit** following `AGENTS.md`.
+7. **Hand off.** If the user decided to install a new service, invoke the `homelab-install` skill with that service.
 
 ## Note format
 
