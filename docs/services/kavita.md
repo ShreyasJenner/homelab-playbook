@@ -8,7 +8,7 @@ URL:        https://manga.example.com
 Config:     ~/docker/kavita/ (docker-compose.yml, .env, config/)
 Depends on: media/manga and media/lns on the 4 TB HDD
 Per-User:   no; one instance, an account per User
-Verified:   2026-10-31
+Verified:   2026-11-01
 ```
 
 ## What it's for
@@ -33,6 +33,7 @@ Compared with Komga, Stump, Mango and Atsumeru on 2026-08-15. Kavita handles man
 - **Folder Watching is on** (Settings → General; it was off until 2026-10-31). New files are picked up within minutes without a manual scan: Tanya showed up under "Recently updated" on 2026-10-31. Per-library overrides were never touched.
 - **Uploads from a phone** go through [Nextcloud](nextcloud.md)'s external storage (`/mnt/manga`), which needed write access for Nextcloud's uid 33 on the manga folder.
 - Layout: one folder per series, volumes as CBZ. Libraries are of type Manga, pointed at `/manga` and `/lns`.
+- **A series must live in exactly one folder.** Kavita takes the series name from the file names, so two folders whose files parse to the same series become one series bound to one folder. Each scan drops the other folder's volumes, and the log says `Volume cleanup code was trying to remove a volume with a file still existing on disk`. Merge the files into one folder ([2026-11-01](../incidents/2026-11-01-kavita-series-split-across-two-folders.md)).
 - `media/manga` and `media/lns` are in the nightly backup.
 - Uptime Kuma checks `http://localhost:5000/api/health`.
 
@@ -44,3 +45,4 @@ Compared with Komga, Stump, Mango and Atsumeru on 2026-08-15. Kavita handles man
 
 - [2026-10-02: media libraries empty after the HDD mounted late](../incidents/2026-10-02-media-libraries-empty-after-late-hdd-mount.md)
 - [2026-10-30: slow to open manga under heavy traffic (server's Wi-Fi downlink at 7.3 Mbit/s)](../incidents/2026-10-30-server-wifi-downlink-stuck-at-mcs0.md)
+- [2026-11-01: only the last volume showed, because the series was split across two folders](../incidents/2026-11-01-kavita-series-split-across-two-folders.md)
