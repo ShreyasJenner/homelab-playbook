@@ -34,4 +34,4 @@ The night before (2026-10-31) the backup step took 16:05 for 18 GiB added. That'
 
 ## Fix
 
-None needed for this night: the converted folders now have a parent snapshot, so the next runs should be back to a few minutes. The design problem stays: the stacks are down while media is read. Splitting the backup so only `~/docker` is copied with the stacks stopped is follow-up 40.
+Nothing more was needed for this night: the converted folders now have a parent snapshot. For the underlying problem (the stacks were down while the media was read), the backup was split on 2026-11-01 (follow-up 40, done). `~/docker` is backed up with the stacks stopped, the stacks start, and the media is backed up as a separate `media` snapshot with everything running. The first split run, on 2026-11-02, kept the services down for 1 min 37 s. See the [Restic page](../services/restic.md).

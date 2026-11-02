@@ -9,19 +9,21 @@ R="restic -r /mnt/backup-hdd/restic-repo --password-file /root/.config/restic/pa
 $R snapshots --compact
 ```
 
+Since 2026-11-02 each night makes two snapshots: `docker` (`~/docker`) and, a minute later, `media` (the media folders). A bare `latest` is therefore usually the `media` one, so narrow it with `--tag docker` or `--tag media`. Snapshots up to 2026-11-01 hold both, and are tagged `docker`.
+
 ## One file or folder
 
 ```bash
-$R ls latest /home/alice/docker/<stack>                  # find it
-$R dump latest /home/alice/docker/<stack>/<file> > /root/<file>   # a single file
-$R restore latest --target /root/restore --include /home/alice/docker/<stack>/<folder>
+$R ls latest --tag docker /home/alice/docker/<stack>                  # find it
+$R dump latest --tag docker /home/alice/docker/<stack>/<file> > /root/<file>   # a single file
+$R restore latest --tag docker --target /root/restore --include /home/alice/docker/<stack>/<folder>
 ```
 
 Restore to a folder on a real disk, not `/tmp` (which may be a small tmpfs). Then copy back what you need, with the right owner.
 
 ## One service, side by side (a test)
 
-1. `$R restore latest --target /root/restore --include /home/alice/docker/<stack>`
+1. `$R restore latest --tag docker --target /root/restore --include /home/alice/docker/<stack>`
 2. Copy `/root/restore/home/alice/docker/<stack>` somewhere new.
 3. In the copy's compose file, change `container_name` and the host port.
 4. `sudo docker compose -p <stack>-test up -d`, and check it works. Then `down`, and delete the copy.
@@ -43,7 +45,7 @@ Vaultwarden: restore under the same `DOMAIN`, and test over HTTPS (a plain `http
    rclone --config <rclone.conf> sync backblaze:restic-backups /mnt/backup-hdd/restic-repo
    ```
 3. Put the restic password in `/root/.config/restic/password` (mode 600).
-4. `$R restore latest --target /`
+4. `$R restore latest --tag docker --target /`, then `$R restore latest --tag media --target /`
 5. Redo the host configuration that isn't in the backup:
    - fstab and the Docker drop-in `RequiresMountsFor=/mnt/hdd-4tb`
    - `/etc/docker/daemon.json` (log rotation)

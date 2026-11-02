@@ -112,7 +112,7 @@ Known gaps in the script:
 
 ### Backups
 
-A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 02:30 (details on the [Restic page](../services/restic.md)). It stops every stack, backs up `~/docker` plus media folders from the 4 TB disk to the restic repo on `/mnt/backup-hdd`, starts the stacks again, and then mirrors the repo to Backblaze B2. **Services, monitoring included, are down for about 3 minutes every night, and for much longer after a lot of new media** (1 h 15 min on 2026-11-01), because the media is read while the stacks are stopped (follow-up 40).
+A systemd timer runs `/usr/local/sbin/restic-docker-backup.sh` as root at about 02:30 (details on the [Restic page](../services/restic.md)). It stops every stack, backs up `~/docker` to the restic repo on `/mnt/backup-hdd`, and starts the stacks again. Then it backs up media folders from the 4 TB disk with everything running, and mirrors the repo to Backblaze B2. **Services, monitoring included, are down for about 1–2 minutes every night** (1 min 37 s on 2026-11-02). Until follow-up 40 (done 2026-11-02), the media was read with the stacks stopped too, so a lot of new media could keep everything down much longer (1 h 15 min on 2026-11-01).
 
 ## Gaps
 

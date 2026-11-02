@@ -56,31 +56,7 @@ sudo systemctl edit restic-docker-backup.service
 ```
 `ExecStartPost` runs only if the script succeeds, so a failure means no ping, and healthchecks.io emails. If the Type isn't oneshot, put the curl at the end of the script instead. The ping URL then lives in `/etc/systemd/system/restic-docker-backup.service.d/override.conf` (a credential; host config isn't backed up).
 
-**40. Back up the media with the stacks running.** Read the script around the backup first (it holds no secrets; the password is a file path):
-```bash
-sudo sed -n '55,80p' /usr/local/sbin/restic-docker-backup.sh
-sudo grep -n -E 'EXTRA_PATHS|group-by|forget' /usr/local/sbin/restic-docker-backup.sh
-```
-Then the change, untested until those lines are seen:
-```bash
-sudo cp -p /usr/local/sbin/restic-docker-backup.sh /usr/local/sbin/restic-docker-backup.sh.bak-YYYYMMDD
-sudo nano /usr/local/sbin/restic-docker-backup.sh
-#  1. the first restic backup: only "$DOCKER_DIR", --tag docker (keep the rc handling)
-#  2. start_all stays right after it
-#  3. a second restic backup: "${EXTRA_PATHS[@]}" --tag media, with the same --exclude options
-#     and the same rc handling (exit 3 = warning), merged into $rc before retention
-sudo bash -n /usr/local/sbin/restic-docker-backup.sh && echo syntax ok
-```
-`forget` groups by host and paths by default, so the two sets keep their own retention, unless the script passes `--group-by`. The first media-only run has no parent and reads everything once, with the stacks up. Check after the next night: the journal shows `uptime-kuma Starting` within a few minutes of the first `Stopping`, and `$R snapshots --compact | tail -3` shows one `docker` and one `media` snapshot. Then update `docs/runbooks/restoring-from-backup.md`: `latest` must be narrowed with `--tag docker` or `--path`. Undo: `sudo cp -p /usr/local/sbin/restic-docker-backup.sh.bak-YYYYMMDD /usr/local/sbin/restic-docker-backup.sh`.
-
 **41. healthchecks.io timing:** in the healthchecks.io dashboard, open the Kuma heartbeat check and note Period and Grace. Kuma pings every 60 s, so a grace of about 10 minutes covers a normal backup with margin. Record the values on the Uptime Kuma page.
-
-**14. After 02:40 on 2026-10-29: did restic skip the Loki and Prometheus data?**
-```bash
-journalctl -u restic-docker-backup.service --since today --no-pager | grep -E 'Added to the repository|Backup finished'
-R="sudo restic -r /mnt/backup-hdd/restic-repo --password-file /root/.config/restic/password"
-$R ls latest /home/alice/docker/monitoring/loki/data | head -3    # expect nothing
-```
 
 **5. The restic password.** Airplane-mode test: open Bitwarden offline and unlock with PIN or biometrics. Make a copy that doesn't depend on the server (for example on paper); `sudo cat /root/.config/restic/password` only while writing it down, and never paste it.
 

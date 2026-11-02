@@ -9,7 +9,7 @@ Units:      restic-docker-backup.timer → restic-docker-backup.service (/etc/sy
 Repo:       /mnt/backup-hdd/restic-repo (1 TB USB backup disk), mirrored to B2 bucket restic-backups
 Secrets:    restic password: /root/.config/restic/password (600, root); B2 key: rclone.conf (see below)
 Depends on: the backup disk mounted with its .backup-drive marker; the 4 TB disk (media paths); rclone and B2
-Verified:   2026-11-01
+Verified:   2026-11-02
 ```
 
 ## What it's for
@@ -19,7 +19,7 @@ A nightly, versioned, encrypted backup of everything needed to rebuild the homel
 ## Why this one
 
 - **Restic rather than an rsync mirror:** a mirror copies deletions straight away and keeps no history. Restic keeps deduplicated, encrypted snapshots with retention, and preserves owners, permissions and symlinks. Borg would have done as well.
-- **Stop the containers rather than dump each database:** one loop covers every stack and every database engine (MariaDB, Postgres, SQLite), and copying a live database directory can give a corrupt copy. The price is downtime each night: about 3–4 minutes, but **as long as restic takes to read the media**, because the media is backed up while the stacks are stopped too (1 h 15 min on 2026-11-01; see Known gaps).
+- **Stop the containers rather than dump each database:** one loop covers every stack and every database engine (MariaDB, Postgres, SQLite), and copying a live database directory can give a corrupt copy. The price is downtime each night, about 1–2 minutes (1 min 37 s on 2026-11-02). Only `~/docker` is backed up with the stacks stopped. The media has no databases in it, so it's backed up after the stacks start again, and a lot of new media no longer lengthens the downtime (follow-up 40; before that it was 1 h 15 min on 2026-11-01).
 - **What's included:** `~/docker`, music, light novels and manga. **TV, anime and movies are left out on purpose:** they're too large for the 1 TB disk.
 - **B2 rather than OneDrive** for the offsite copy: OneDrive didn't have the space. B2 is pay-as-you-go.
 - **Mirror the repo with rclone** rather than keep a second restic repo: the repo already existed on the disk. The mirror only runs if `restic check` passes, so a corrupt local repo isn't copied over the good offsite one.
@@ -32,17 +32,21 @@ The timer fires at 02:30 (with up to 10 minutes of random delay; `Persistent=tru
 1. **Checks the backup disk.** It mounts `/mnt/backup-hdd` if needed, and **aborts without touching any container** unless the disk is mounted *and* `/mnt/backup-hdd/.backup-drive` exists. Without the marker, an unmounted disk would just be an empty folder on the internal disk.
 2. **Records the running images** in `~/docker/.image-manifest.txt` (names, image tags and digests), so a restore can use the same versions.
 3. **Stops every running project** in `~/docker/*/` with `docker compose stop`. A `trap` makes sure they're started again even if the backup fails.
-4. **Backs up:**
+4. **Backs up `~/docker`** with the stacks stopped:
    ```
    restic backup ~/docker \
-     /mnt/hdd-4tb/media/{music,lns,manga} \
      --host homelab --tag docker --exclude-caches --exclude-if-present .nobackup
    ```
-   Exit code 3 (some files unreadable) counts as a warning.
-5. **Starts the projects again** straight away (`start_all`, line 70, verified 2026-11-01), before retention and the check.
-6. **Applies retention:** `forget --prune --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --keep-yearly 1`.
-7. **Checks the repo:** `restic check` every night, and on Sundays re-reads 5% of the data.
-8. **Mirrors to B2**, only if the check passed: `rclone sync` to `backblaze:restic-backups` with `--b2-hard-delete`, under a lock so two syncs can't overlap.
+5. **Starts the projects again** straight away (`start_all`), before the media, retention and the check.
+6. **Backs up the media** with everything running, as a separate snapshot:
+   ```
+   restic backup /mnt/hdd-4tb/media/{music,lns,manga} \
+     --host homelab --tag media --exclude-caches --exclude-if-present .nobackup
+   ```
+   For either backup, exit code 3 (some files unreadable) counts as a warning. Any other failure ends the script before retention.
+7. **Applies retention:** `forget --prune --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --keep-yearly 1`. `forget` groups snapshots by host and path set, so the `docker` and `media` snapshots each keep their own history.
+8. **Checks the repo:** `restic check` every night, and on Sundays re-reads 5% of the data.
+9. **Mirrors to B2**, only if the check passed: `rclone sync` to `backblaze:restic-backups` with `--b2-hard-delete`, under a lock so two syncs can't overlap.
 
 **Excluding something:** put an empty `.nobackup` file in the folder. Loki's and Prometheus's data folders have one (2026-10-28). Their older data stays in existing snapshots until retention removes them.
 
@@ -52,9 +56,11 @@ The timer fires at 02:30 (with up to 10 minutes of random delay; `Persistent=tru
 - **The B2 application key:** in `/home/alice/.config/rclone/rclone.conf` (remote `backblaze`), restricted to the one bucket. The file also still holds an old `onedrive` remote and token.
 - The repo itself contains every `.env` file, encrypted by restic.
 
-### State on 2026-11-01
+### State on 2026-11-02
 
-- 10 snapshots (2026-10-11 to 2026-11-01), latest 392.7 GiB (up from 270.1 GiB the night before; only 24 GiB was new data).
+- Each night now makes two snapshots: `docker` (`~/docker`, 63.9 GiB) and `media` (329.0 GiB). The first split run, on 2026-11-02, took 42 s for `~/docker` and 2 s for the media.
+- The first `docker` and `media` snapshots were seeded by hand on 2026-11-01 with `--parent` set to the last combined snapshot. Without that, neither new path set would have had a parent, and the first `~/docker` run would have read all 64 GiB with the stacks stopped. The `docker` seed was taken with the databases live, so it was forgotten once the 2026-11-02 run had worked.
+- The 10 combined snapshots (2026-10-11 to 2026-11-01, `~/docker` and media together) are a path set of their own, which `forget` keeps applying the policy to. No new snapshots join it, so it won't be thinned beyond what the policy keeps.
 - On 2026-10-28: repo 207 GB on the 916 GB backup disk (24% used).
 - B2 has space alerts, but no cap.
 - The latest snapshot contains the data of Nextcloud, Vaultwarden, Gitea, Memos, Mindwtr, Actual Budget, Uptime Kuma and ntfy.
@@ -66,11 +72,13 @@ The repository and password only exist inside the script, so pass them every tim
 ```bash
 R="sudo restic -r /mnt/backup-hdd/restic-repo --password-file /root/.config/restic/password"
 $R snapshots --compact
-$R ls latest /home/alice/docker/<stack>
+$R ls latest --tag docker /home/alice/docker/<stack>
 sudo journalctl -u restic-docker-backup.service --since today --no-pager | tail -20
 ```
 
 `journalctl` needs `sudo` here: without it, it prints only a hint and no lines.
+
+A bare `latest` is the newest snapshot of any kind, which is usually the `media` one. Narrow it with `--tag docker` or `--tag media`.
 
 ## What isn't backed up
 
@@ -80,7 +88,7 @@ sudo journalctl -u restic-docker-backup.service --since today --no-pager | tail 
 
 ## Known gaps
 
-- **Every service stays down while restic reads the media.** On a quiet night that's 3–4 minutes. After a lot of new manga, LNs or music, or when files turn up at paths restic hasn't seen (renames, moves, the 2026-10-31 symlink-to-hardlink conversion), it's much longer: 16 min on 2026-10-31, 1 h 15 min on 2026-11-01. Anything over a few minutes sets off the healthchecks.io email. Fix: back up the media with the stacks running (follow-up 40).
+- **Downtime still depends on `~/docker`.** A big change there (a large Nextcloud upload, or a stack folder moved or renamed so restic has no parent for it) still keeps every stack down while restic reads it. Media no longer does (follow-up 40, done 2026-11-02).
 - **A failed run alerts nobody.** The service has no `OnFailure=`, and nothing pings ntfy or healthchecks.io (follow-up 28).
 - **Only one restore has been tested** (Navidrome, 2026-10-15). Not Vaultwarden, not Nextcloud, nothing from B2 (follow-up 30).
 - Disk health (SMART) has never been checked; `smartmontools` isn't installed (follow-up 29).
