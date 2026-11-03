@@ -6,3 +6,6 @@ assets/
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/homelab-*/
+
+__pycache__/
+.pytest_cache/

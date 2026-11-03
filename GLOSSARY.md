@@ -24,6 +24,20 @@ _Avoid_: Account (an account is one User's login on one service; admin is an acc
 Who can reach a service: *tailnet-only* (the default: only devices on the tailnet, through the reverse proxy; not the home LAN or the internet) or *public* (open to the internet through Funnel).
 _Avoid_: Access (that means logging in), visibility, open
 
+## Media
+
+**Series**:
+One manga or light novel, as a reader knows it: every volume and chapter of one title. Each series lives in exactly one folder.
+_Avoid_: Title, manga (when meaning one series), book
+
+**Volume**:
+One collected book of a series, kept as one file.
+_Avoid_: Volume when meaning storage (say Docker volume, disk or partition), tankōbon, book
+
+**Chapter**:
+One installment of a series, smaller than a volume. A chapter not yet collected into a volume is kept as its own file.
+_Avoid_: Episode, issue
+
 ## Documentation
 
 **Playbook**:
