@@ -4,19 +4,7 @@ Drafted 2026-10-28 and untested; the numbers are those in [`FOLLOWUPS.md`](FOLLO
 
 ## 1. Security
 
-**10. Monitoring ports to loopback** (first: Prometheus, Loki, cAdvisor and the Alloy UI have no authentication). Binding to `127.0.0.1` rather than removing the ports keeps Caddy and `loki-storage-check.sh` (`localhost:3517`) working.
-```bash
-cd ~/docker/monitoring
-cp -p docker-compose.yml docker-compose.yml.bak-20261028
-grep -n -A2 'ports:' docker-compose.yml
-nano docker-compose.yml     # each  - "${X_HOST_PORT}:..."  ->  - "127.0.0.1:${X_HOST_PORT}:..."
-diff docker-compose.yml.bak-20261028 docker-compose.yml
-sudo docker compose config --quiet && sudo docker compose up -d
-sudo ss -tlnp | grep -E ':(4710|9090|3517|8186|12761)\b'    # every line 127.0.0.1
-```
-Check: `grafana.example.com` loads; from the phone with Tailscale off, `http://198.51.100.10:9090` fails. Undo: restore the `.bak`, then `up -d`. Side effect: the recreated containers get capped logs.
-
-**4. The same for the other stacks, one at a time.** Leave Nextcloud `8080` and Euro-Office `9917` (they call each other on the LAN IP). Ports: ntfy 10230, Gitea 8310/8312, Memos 9418, Mindwtr 6301/6302, Actual Budget 5006, Invidious 3000, Navidrome 4533, Kavita 5000, Jellyfin 8167 (TCP only), Redlib 8943/8941. Before starting, find callers that use the LAN IP (`-o` prints only the match, so no secrets):
+**4. Bind published ports to `127.0.0.1`, one stack at a time.** The monitoring stack is done (follow-up 10, 2026-11-03); the same `sed` worked there: `sed -i -E 's/- "\$\{([A-Z]+_HOST_PORT)\}:/- "127.0.0.1:${\1}:/' docker-compose.yml`, after a `cp -p` backup and followed by a `diff`. Stacks that write their port lines differently need their own edit. Leave Nextcloud `8080` and Euro-Office `9917` (they call each other on the LAN IP). Ports: ntfy 10230, Gitea 8310/8312, Memos 9418, Mindwtr 6301/6302, Actual Budget 5006, Invidious 3000, Navidrome 4533, Kavita 5000, Jellyfin 8167 (TCP only), Redlib 8943/8941. Before starting, find callers that use the LAN IP (`-o` prints only the match, so no secrets):
 ```bash
 sudo grep -rno '198\.51\.100\.10:[0-9]*' ~/docker --include='*.yml' --include='*.yaml' --include='.env' --include='*.ini' --include='*.json' --include='*.xml' 2>/dev/null | sort -u
 ```

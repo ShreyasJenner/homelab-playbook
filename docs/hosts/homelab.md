@@ -65,7 +65,7 @@ Default deny incoming, allow outgoing, deny routed. Rules:
 
 The leftovers are recorded, not cleaned up.
 
-**ufw doesn't cover ports that Docker publishes.** Docker's own iptables rules come first, so a port published on `0.0.0.0` is reachable from the home LAN at `198.51.100.10:<port>`, bypassing Caddy and Tailscale. Host-network services (Caddy, Uptime Kuma, Homepage) are filtered correctly. See the open incident [Tailnet-only services are reachable from the home LAN](../incidents/2026-10-28-services-reachable-from-home-lan.md).
+**ufw doesn't cover ports that Docker publishes.** Docker's own iptables rules come first, so a port published on `0.0.0.0` is reachable from the home LAN at `198.51.100.10:<port>`, bypassing Caddy and Tailscale. Host-network services (Caddy, Uptime Kuma, Homepage) are filtered correctly. So are Vaultwarden, invidious-companion and the [monitoring stack](../services/monitoring.md) (since 2026-11-03), which bind `127.0.0.1`. See the open incident [Tailnet-only services are reachable from the home LAN](../incidents/2026-10-28-services-reachable-from-home-lan.md).
 
 ## Docker
 

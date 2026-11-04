@@ -3,14 +3,14 @@
 ```
 Status:     live (since 2026-08-22; Loki and Alloy since 2026-08-29)
 Host:       homelab
-Exposure:   tailnet-only through Caddy (Grafana only), but every published port is open on the home LAN
+Exposure:   tailnet-only through Caddy (Grafana only); every published port binds 127.0.0.1 (since 2026-11-03)
 URL:        https://grafana.example.com
 Config:     ~/docker/monitoring/ (one Compose project: docker-compose.yml, .env, prometheus/prometheus.yml,
             loki/loki-config.yml, alloy/config.alloy; data in grafana/data, prometheus/data, loki/data)
 Secrets:    Grafana admin password in ~/docker/monitoring/.env as GRAFANA_ADMIN_PASSWD (<GRAFANA_ADMIN_PASSWD>)
 Depends on: read-only host mounts (docker.sock, /var/lib/docker, /sys, /proc, /var/log/journal); Caddy; Tailscale
 Per-User:   no
-Verified:   2026-10-28
+Verified:   2026-10-28 (ports: 2026-11-03)
 ```
 
 One page for six containers: they're one Compose project, they start, stop, update and back up together, and only Grafana has a URL. **Alerts don't come from here.** [Uptime Kuma](uptime-kuma.md) and [ntfy](ntfy.md) do that; this stack is for looking things up after the fact, and it's rarely used.
@@ -52,7 +52,7 @@ CPU tip: in `docker stats`, 100% means one full core, and the host has 10 cores,
 
 ## How it's set up
 
-All six are on the Docker network `monitoring_default` and reach each other by container name. Every image follows `latest`. The uids in the Data column are what each container runs as (verified 2026-10-28; Prometheus runs as `nobody` = 65534), so a fresh data folder needs `chown` to it.
+All six are on the Docker network `monitoring_default` and reach each other by container name. Every image follows `latest`. **Every published port binds `127.0.0.1`** (`"127.0.0.1:${X_HOST_PORT}:…"` in `docker-compose.yml`, since 2026-11-03, follow-up 10). So the host ports in the table answer only on the host itself: Caddy, the Homepage tile and `loki-storage-check.sh` use `localhost`, and the home LAN gets "connection refused". Verified 2026-11-03: `ss` shows only `127.0.0.1` listeners, `198.51.100.10:<port>` is refused from the host and from a phone with Tailscale off, `grafana.example.com` shows data, and every health endpoint answers on `localhost` (Loki's `/ready` takes about a minute after a restart). The uids in the Data column are what each container runs as (verified 2026-10-28; Prometheus runs as `nobody` = 65534), so a fresh data folder needs `chown` to it.
 
 | Container | Image | Host port → container | Role | Data |
 |---|---|---|---|---|
@@ -84,10 +84,10 @@ It mounts `docker.sock` (ro), `/var/lib/docker/containers`, `/var/log/journal` a
 
 ## Known gaps
 
-- **Prometheus `9090`, Loki `3517`, cAdvisor `8186` and the Alloy UI `12761` have no authentication and are open on the home LAN.** Nothing outside the Docker network needs them, so drop those `ports:` entries (follow-up 10, part of the [LAN-exposure incident](../incidents/2026-10-28-services-reachable-from-home-lan.md)). Grafana `4710` is LAN-reachable too, behind its login.
+- **Prometheus, Loki, cAdvisor and the Alloy UI have no authentication.** Since 2026-11-03 (follow-up 10) they bind `127.0.0.1` only, so only someone already on the host can reach them. Before that, they and Grafana were open on the home LAN ([LAN-exposure incident](../incidents/2026-10-28-services-reachable-from-home-lan.md)).
 - **Alloy (`docker.sock`) and cAdvisor (`privileged`) are effectively root on the host.** Read-only on the socket doesn't change that.
 - **Everything follows `latest`**, so `stacks.sh update` can pull a Loki or Alloy release with breaking config changes. A Loki 3.x config change has already broken it once ([2026-08-29](../incidents/2026-08-29-loki-crash-loop-compactor-config.md)).
-- Containers created before 2026-10-28 have uncapped Docker logs until they're recreated (`loki-storage-check.sh` lists them).
+- Containers created before 2026-10-28 have uncapped Docker logs until they're recreated (`loki-storage-check.sh` lists them). All six in this stack were recreated on 2026-11-03, so their logs are now capped.
 
 ## Runbooks
 

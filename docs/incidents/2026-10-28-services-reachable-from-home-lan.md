@@ -13,25 +13,25 @@ Ports recorded so far (2026-10-28; all published on `0.0.0.0` and `[::]`):
 
 | Port | Service | Tested from the LAN | Authentication |
 |---|---|---|---|
-| `4710` | Grafana | loads | Grafana login |
+| `4710` | Grafana | loads; **fixed 2026-11-03** (`127.0.0.1`) | Grafana login |
 | `10230` | ntfy | loads | `deny-all` for anonymous |
-| `9090` | Prometheus | not tested | **none** |
-| `3517` | Loki | not tested | **none** |
-| `8186` | cAdvisor | not tested | **none** |
-| `12761` | Alloy UI | not tested | **none** |
+| `9090` | Prometheus | **fixed 2026-11-03**: refused from the phone with Tailscale off | **none** |
+| `3517` | Loki | **fixed 2026-11-03** (`127.0.0.1`) | **none** |
+| `8186` | cAdvisor | **fixed 2026-11-03** (`127.0.0.1`) | **none** |
+| `12761` | Alloy UI | **fixed 2026-11-03** (`127.0.0.1`) | **none** |
 | `8310`, `8312` | Gitea web and **SSH** | not tested | Gitea login, SSH keys |
 | `9418` | Memos | not tested | Memos login |
 | `6301`, `6302` | Mindwtr app and cloud | not tested | |
 | `5006` | Actual Budget | not tested | Actual login |
 | `3000` | Invidious | not tested | |
 
-Not affected: host-network services behind ufw (Caddy, Uptime Kuma `3001` (tested: times out), Homepage `9640`/`9641` (tested)), and services bound to `127.0.0.1` (Vaultwarden, invidious-companion). The four monitoring ports with no authentication are needed by nothing outside their Docker network, so they can simply be unpublished ([monitoring stack](../services/monitoring.md), follow-up 10).
+Not affected: host-network services behind ufw (Caddy, Uptime Kuma `3001` (tested: times out), Homepage `9640`/`9641` (tested)), and services bound to `127.0.0.1` (Vaultwarden, invidious-companion). The monitoring stack (Grafana plus the four ports with no authentication) is fixed: since 2026-11-03 every one of its ports binds `127.0.0.1` ([monitoring stack](../services/monitoring.md), follow-up 10, done). Caddy and Homepage still reach Grafana on `localhost`.
 
 ## Cause (probable)
 
 Ports published by Docker get Docker's own iptables rules, which apply before ufw's. So ufw's `deny (incoming)` doesn't cover them. Caddy runs in host network mode, isn't published by Docker, and is filtered correctly (`443/tcp on tailscale0` only).
 
-## Fix (planned, not applied)
+## Fix (partly applied: the monitoring stack on 2026-11-03; the rest is follow-up 4)
 
 Bind each published port to loopback (`"127.0.0.1:<host>:<container>"` in each compose file), so Caddy, which reaches services on `localhost`, is the only way in. Exceptions to check before changing anything:
 
