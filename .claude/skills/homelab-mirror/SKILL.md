@@ -32,5 +32,5 @@ Stand-ins follow the **Public** section of [`homelab-blog`](../homelab-blog/SKIL
    Done when every listed commit is read and every proposal is accepted or rejected, with no new map rules from this pass. On a first publish, the list is the whole history. Review it in batches of about ten commits and report after each batch.
 3. **Update.** If the build said `REWRITE`, tell the user which published commit changes and that the push will need `--force-with-lease`, and get their agreement. Then run `python3 -I .claude/skills/homelab-mirror/mirror.py update <scratchpad>/mirror`, adding `--rewrite` only after that agreement.
 
-   Done when it prints the push command. Give that command to the user.
+   Done when it prints the push command. Give that command to the user. If the Mirror has never been pushed (no `origin/main` in the checkout) or the build said `REWRITE`, tell them to run `/homelab-mirror-audit` in a new session first, and to push only on its "safe to push". If it isn't safe, put its fixes to the user as in step 2.
 4. **Commit the map.** If `map.txt` or the check changed, commit them in the Playbook following AGENTS.md's committing rules. Only committed Playbook work is mirrored, but the map is read from the working tree, so the Mirror already used the new rules.
