@@ -16,6 +16,7 @@ PLAYBOOK = HERE.parents[2]
 MIRROR = Path(os.environ.get("HOMELAB_MIRROR", Path.home() / "dev/projects/github/homelab-playbook"))  # override: tests only
 MAP = HERE / "map.txt"
 PRIVATE = ("homelab-mirror/map.txt", "homelab-mirror/identity.txt")  # dropped wherever they have lived
+LEFT_OUT = ("blog/",)  # the blog drafts and SERIES.md, which records post URLs under the author's handle
 # identity.txt: "name: …", "email: …" (the GitHub noreply address), "remote: …" (the GitHub URL)
 IDENTITY = dict(line.split(": ", 1) for line in (HERE / "identity.txt").read_text().splitlines() if ": " in line)
 NAME, EMAIL, GITHUB = IDENTITY["name"], IDENTITY["email"], IDENTITY["remote"]
@@ -34,6 +35,28 @@ def commit_keys(repo, ref):
     return {h: (d, s) for h, d, s in (line.split("\x00") for line in out.splitlines())}
 
 
+def rename_callback(rules_text):
+    """filter-repo --filename-callback body: the map applied to file names, as --replace-text applies it to
+    contents (every literal in order, then every regex), so a link and the file it points to change alike."""
+    literals, regexes = [], []
+    for line in rules_text.encode("utf-8").splitlines():
+        real, sep, stand_in = line.rpartition(b"==>")
+        if not sep:
+            real, stand_in = line, b"***REMOVED***"
+        if real.startswith(b"regex:"):
+            regexes.append((real[6:], stand_in))
+        else:
+            literals.append((real, stand_in))
+    return ("import re\n"
+            "if filename is None:\n"  # a deleteall change has no name
+            "    return filename\n"
+            f"for old, new in {literals!r}:\n"
+            "    filename = filename.replace(old, new)\n"
+            f"for old, new in {regexes!r}:\n"
+            "    filename = re.sub(old, new, filename)\n"
+            "return filename\n")
+
+
 def build(work):
     work = Path(work)
     rebuilt = work / "rebuilt"
@@ -50,6 +73,7 @@ def build(work):
 
     cmd = ["git", "-C", str(rebuilt), "filter-repo", "--force", "--quiet",
            "--replace-text", str(rules), "--replace-message", str(rules),
+           "--filename-callback", rename_callback(rules.read_text(encoding="utf-8")),
            "--name-callback", f"return {NAME.encode()!r}",
            "--email-callback", f"return {EMAIL.encode()!r}",
            "--commit-callback",
@@ -58,8 +82,7 @@ def build(work):
            "commit.committer_date = commit.committer_date.split()[0] + b' +0000'\n"
            "if not commit.parents:\n"
            f"    commit.file_changes.append(FileChange(b'M', b'README.md', b'{notice}', b'100644'))\n"]
-    if private_paths:
-        cmd += ["--invert-paths"] + [a for p in private_paths for a in ("--path", p)]
+    cmd += ["--invert-paths"] + [a for p in private_paths + list(LEFT_OUT) for a in ("--path", p)]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode:
         sys.exit(f"filter-repo failed:\n{r.stderr.strip()}")

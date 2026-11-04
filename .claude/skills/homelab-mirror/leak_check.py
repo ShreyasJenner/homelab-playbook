@@ -112,6 +112,8 @@ def main(repo, map_file, allowed_email):
     for path in sorted(set(git(repo, "log", "--all", "--format=", "--name-only").split("\n"))):
         if path.endswith(PRIVATE):
             leaks.append(f"PRIVATE {path}")
+        elif path:
+            check_map(f"- (file name) {path}", path)
 
     for line in git(repo, "log", "--all", "--format=%H %ae %ce").splitlines():
         commit, *emails = line.split()

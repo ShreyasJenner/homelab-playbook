@@ -151,6 +151,16 @@ def test_map_value_written_regex_escaped_fails(tmp_path):
 
 def test_map_value_matches_any_case_but_only_from_a_word_start(tmp_path):
     repo = make_repo(tmp_path, [("Add page", {"docs/page.md": "[quillbarrowzz.yml](link) and a nozzle\n"})])
-    code, out = run(repo, make_map(tmp_path, "Quillbarrow==>Internet Archive", "Ozzle==>Someone"))
+    code, out = run(repo, make_map(tmp_path, "Quillbarrow==>Some Library", "Ozzle==>Someone"))
     assert code == 1
     assert "quillbarrow" in out.lower() and "ozzle" not in out.lower()
+
+
+def test_map_value_in_a_file_name_fails(tmp_path):
+    repo = make_repo(tmp_path, [
+        ("Add incident", {"docs/incidents/hastur-down.md": "It broke.\n"}),
+        ("Rename it", {"docs/incidents/hastur-down.md": None, "docs/incidents/host-down.md": "It broke.\n"}),
+    ])
+    code, out = run(repo, make_map(tmp_path, "hastur==>alice"))
+    assert code == 1
+    assert out.startswith("MAP") and "file name" in out and "hastur-down.md" in out

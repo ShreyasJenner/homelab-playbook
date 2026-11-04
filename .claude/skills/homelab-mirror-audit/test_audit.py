@@ -96,3 +96,18 @@ def test_map_marks_stand_ins_and_withholds_real_sides(tmp_path, capsys):
     assert "Ask ⟦bob⟧ at ⟦cloud.example.com⟧" in out and "stand-ins from rules [2, 3]" in out
     assert "'bob': stand-in side of rules [2]; real side of rules none" in out
     assert "harbour" not in out
+
+
+def test_map_marks_back_reference_and_short_stand_ins(tmp_path, capsys):
+    repo = make_repo(tmp_path, [("Add page", {"docs/page.md": "Server 198.51.100.10, grep '198\\.51\\.100\\.7', song 良宵, a b c\n"}, None)])
+    map_file = tmp_path / "map.txt"
+    map_file.write_text("regex:\\b10\\.1\\.1\\.(\\d{1,3})\\b==>198.51.100.\\1\n"
+                        "regex:10\\\\\\.1\\\\\\.1\\\\\\.(\\d{1,3})==>198\\\\.51\\\\.100\\\\.\\1\n"
+                        "harbourtune==>良宵\n"
+                        "harbourmaster==>b\n")
+    audit.map_at(["docs/page.md:1"], audit.load_rules(map_file), repo)
+    out = capsys.readouterr().out
+    assert "Server ⟦198.51.100.10⟧," in out and "'⟦198\\.51\\.100\\.7⟧'" in out
+    assert "song ⟦良宵⟧" in out
+    assert "a ⟦b⟧? c" in out  # a short ASCII stand-in only as a whole word, and only as a maybe
+    assert "stand-ins from rules [1, 2, 3]" in out and "maybe from rules [4]" in out

@@ -8,4 +8,4 @@ This is the documentation for my self-hosted homelab: a home server running abou
 - People are `alice` and `bob`. The ISP and location are left out.
 - Media titles are public-domain works, so names, years and database IDs in the incident notes don't match what was actually on the disk, and the lyrics research tables are illustrative.
 
-Ports, dates, software versions and hardware are real. `docs/adr/0005-public-mirror-with-stand-ins.md` explains how the mirror is built.
+Standard ports and each software's default ports are real; ports chosen for this homelab are stand-ins, the same number everywhere. Dates, software versions and hardware are real. `docs/adr/0005-public-mirror-with-stand-ins.md` explains how the mirror is built.

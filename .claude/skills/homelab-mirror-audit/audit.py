@@ -6,6 +6,8 @@
   python3 -I audit.py where   <categories.tsv> [repo]  pass 6: where each category occurs in the history and the final tree
   python3 -I audit.py map     <stand-in>...            the map rules with that text on their stand-in or real side (line numbers only)
   python3 -I audit.py map --at <file>:<line>...        a line of the checkout, with the parts that came from a stand-in marked
+                                                       (back-references included; a stand-in under 3 ASCII characters
+                                                       only as a whole word, marked as a maybe)
 
 repo defaults to the Mirror checkout. categories.tsv holds one "<generic name><TAB><python regex>" per line.
 """
@@ -318,8 +320,37 @@ def map_terms(terms, rules):
         print(f"{term!r}: stand-in side of rules {stand_in or 'none'}; real side of rules {real or 'none'}")
 
 
+def stand_in_pattern(real, stand_in):
+    """(regex finding the stand-in's text in the Mirror, maybe). A regex rule's stand-in is a re.sub template: `\\\\` is
+    a backslash and `\\1` or `\\g<name>` a captured value, matched as a run of word characters. A short ASCII
+    stand-in ("b") is matched only as a whole word, and only as a maybe: it is also an ordinary word."""
+    plain = stand_in if not real.startswith("regex:") or "\\" not in stand_in else None
+    if plain is not None:
+        if not any(c.isalnum() for c in plain):
+            return None, False  # punctuation alone (a rule that deletes words) can't be told from the text
+        if len(plain) < 3 and plain.isascii():
+            return rf"(?<!\w){re.escape(plain)}(?!\w)", True
+        return re.escape(plain), False
+    out, i, ends_in_group = [], 0, False
+    while i < len(stand_in):
+        group = re.match(r"\\(\d+|g<\w+>)", stand_in[i:])
+        if group:
+            out.append(r"\w+?")
+            i += len(group.group(0))
+            ends_in_group = i == len(stand_in)
+            continue
+        if stand_in[i] == "\\" and i + 1 < len(stand_in):
+            out.append(re.escape({"n": "\n", "t": "\t"}.get(stand_in[i + 1], stand_in[i + 1])))
+            i += 2
+        else:
+            out.append(re.escape(stand_in[i]))
+            i += 1
+    return "".join(out) + (r"(?!\w)" if ends_in_group else ""), False
+
+
 def map_at(places, rules, repo):
-    stand_ins = [(n, s) for n, _, s in rules if len(s) >= 3 and "\\" not in s]  # skip back-references
+    stand_ins = [(n, rx, maybe) for n, r, s in rules if s and s != "***REMOVED***"
+                 for rx, maybe in [stand_in_pattern(r, s)] if rx]
     for place in places:
         path, _, number = place.rpartition(":")
         try:
@@ -327,19 +358,23 @@ def map_at(places, rules, repo):
         except (subprocess.CalledProcessError, ValueError, IndexError):
             print(f"{place}: no such line in the checkout's main")
             continue
-        spans = sorted(((m.start(), m.end(), n) for n, s in stand_ins for m in re.finditer(re.escape(s), line)),
-                       key=lambda span: span[0] - span[1])  # longest first
+        spans = sorted(((m.start(), m.end(), n, maybe) for n, rx, maybe in stand_ins for m in re.finditer(rx, line)
+                        if m.end() > m.start()),
+                       key=lambda span: (span[3], span[0] - span[1]))  # sure before maybe, then longest first
         chosen = []
-        for start, end, n in spans:
-            if all(end <= a or start >= b for a, b, _ in chosen):
-                chosen.append((start, end, n))
+        for start, end, n, maybe in spans:
+            if all(end <= a or start >= b for a, b, *_ in chosen):
+                chosen.append((start, end, n, maybe))
         marked, at = "", 0
-        for start, end, n in sorted(chosen):
-            marked += line[at:start] + "⟦" + line[start:end] + "⟧"
+        for start, end, n, maybe in sorted(chosen):
+            marked += line[at:start] + "⟦" + line[start:end] + "⟧" + ("?" if maybe else "")
             at = end
         print(f"{place}: {marked + line[at:]}")
-        print(f"  stand-ins from rules {sorted({n for *_, n in chosen})}" if chosen
-              else "  no stand-ins: all of it is the Playbook's own text")
+        sure = sorted({n for _, _, n, maybe in chosen if not maybe})
+        maybe = sorted({n for _, _, n, maybe in chosen if maybe})
+        parts = ([f"stand-ins from rules {sure}"] if sure else []) + \
+                ([f"maybe from rules {maybe} (short stand-ins, marked ⟦…⟧?)"] if maybe else [])
+        print(f"  {'; '.join(parts)}" if parts else "  no stand-ins: all of it is the Playbook's own text")
 
 
 def main(argv):
