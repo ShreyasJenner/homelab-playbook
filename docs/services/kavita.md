@@ -8,7 +8,7 @@ URL:        https://manga.example.com
 Config:     ~/docker/kavita/ (docker-compose.yml, .env, config/)
 Depends on: media/manga and media/lns on the 4 TB HDD
 Per-User:   no; one instance, an account per User
-Verified:   2026-11-02
+Verified:   2026-11-03
 ```
 
 ## What it's for
