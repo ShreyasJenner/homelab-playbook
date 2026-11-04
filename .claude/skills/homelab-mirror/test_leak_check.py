@@ -78,6 +78,7 @@ REAL_EMAIL = "someone" "@proton.me"
     ("IP", "Tailscale IP 100.88" ".1.2"),
     ("IP", "the server at 240.0" ".0.25"),
     ("EMAIL", "alerts go to " + REAL_EMAIL),
+    ("IP", r"sudo grep -rno '192\.168" r"\.4\.1:[0-9]*' ~/docker"),  # regex-escaped, as in a grep pattern
 ])
 def test_identifying_pattern_not_in_the_map_fails(tmp_path, kind, leak):
     repo = make_repo(tmp_path, [("Add page", {"docs/page.md": leak + "\n"})])
@@ -90,7 +91,8 @@ def test_stand_ins_and_well_known_values_pass(tmp_path):
     page = ("https://homelab.tail0000.ts.net:8443, 192.0.2.10, 198.51.100.10, 203.0.113.1,\n"
             "127.0.0.1, 0.0.0.0, 8.8.8.8, 1.1.1.1, 100.100.100.100, 10.10.10.2, 172.20.0.1,\n"
             "alice@example.com, noreply@anthropic.com, busybox 1.36.1, Redlib 0.40.0,\n"
-            "Kavita v0.9.1.4, TheTVDB_24.0.0.0, Docker DNS 127.0.0.11, rebind drops 100.64.0.0/10\n")
+            "Kavita v0.9.1.4, TheTVDB_24.0.0.0, Docker DNS 127.0.0.11, rebind drops 100.64.0.0/10,\n"
+            "grep -o '198\\.51\\.100\\.10', check-public.sh's ^(192\\.0\\.2|198\\.51\\.100)\\.\n")
     repo = make_repo(tmp_path, [("Add page\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
                                  {"docs/page.md": page})])
     code, out = run(repo, make_map(tmp_path))
@@ -129,6 +131,13 @@ def test_missing_gitleaks_fails_instead_of_passing(tmp_path):
     code, out = run(repo, make_map(tmp_path), env={**os.environ, "PATH": str(bin_dir)})
     assert code == 1
     assert out.startswith("GITLEAKS") and "not installed" in out
+
+
+def test_map_value_written_regex_escaped_fails(tmp_path):
+    repo = make_repo(tmp_path, [("Add page", {"docs/page.md": r"grep -o 'cloud\.hastur\.org' Caddyfile" + "\n"})])
+    code, out = run(repo, make_map(tmp_path, "cloud.hastur.org==>cloud.example.com"))
+    assert code == 1
+    assert "MAP" in out and "cloud.hastur.org" in out
 
 
 def test_map_value_matches_any_case_but_only_from_a_word_start(tmp_path):

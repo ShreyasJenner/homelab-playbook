@@ -91,6 +91,7 @@ def main(repo, map_file, allowed_email):
     leaks = []
 
     def check_map(where, text):
+        text = text.replace("\\.", ".")  # a regex-escaped value (grep '192\.168\.…') is still the value
         for value, rx in literal_patterns:
             if rx.search(text):
                 leaks.append(f"MAP {where}: {value}")
