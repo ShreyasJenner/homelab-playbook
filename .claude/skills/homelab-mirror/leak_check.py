@@ -119,6 +119,13 @@ def main(repo, map_file, allowed_email):
             if e.lower() != allowed_email.lower():
                 leaks.append(f"IDENTITY {commit[:8]}: {e}")
 
+    # A local UTC offset (and its DST switch) places the author; every Mirror date is +0000.
+    for line in git(repo, "log", "--all", "--format=%H %ad %cd", "--date=format:%z").splitlines():
+        commit, *offsets = line.split()
+        for tz in sorted(set(offsets)):
+            if tz != "+0000":
+                leaks.append(f"TIMEZONE {commit[:8]}: {tz}")
+
     leaks.extend(gitleaks(repo))
 
     for line in leaks:

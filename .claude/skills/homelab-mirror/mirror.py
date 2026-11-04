@@ -30,7 +30,7 @@ def git(repo, *args, check=True):
 
 def commit_keys(repo, ref):
     """Commit hash -> (author date, subject): how a commit is recognised across rebuilds, whatever its hash."""
-    out = git(repo, "log", "--format=%H%x00%aI%x00%s", ref)
+    out = git(repo, "log", "--format=%H%x00%at%x00%s", ref)  # %at: the instant, whatever the offset
     return {h: (d, s) for h, d, s in (line.split("\x00") for line in out.splitlines())}
 
 
@@ -53,6 +53,9 @@ def build(work):
            "--name-callback", f"return {NAME.encode()!r}",
            "--email-callback", f"return {EMAIL.encode()!r}",
            "--commit-callback",
+           # Same instant, offset +0000: a local offset and its DST switch place the author.
+           "commit.author_date = commit.author_date.split()[0] + b' +0000'\n"
+           "commit.committer_date = commit.committer_date.split()[0] + b' +0000'\n"
            "if not commit.parents:\n"
            f"    commit.file_changes.append(FileChange(b'M', b'README.md', b'{notice}', b'100644'))\n"]
     if private_paths:

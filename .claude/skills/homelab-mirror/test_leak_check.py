@@ -9,14 +9,16 @@ SCRIPT = Path(__file__).with_name("leak_check.py")
 EMAIL = "alice@example.com"
 
 
-def git(repo, *args, email=EMAIL):
+def git(repo, *args, email=EMAIL, tz="+0000"):
+    date = f"1761998400 {tz}"
     env = {**os.environ, "GIT_AUTHOR_NAME": "Alice", "GIT_AUTHOR_EMAIL": email,
            "GIT_COMMITTER_NAME": "Alice", "GIT_COMMITTER_EMAIL": email,
+           "GIT_AUTHOR_DATE": date, "GIT_COMMITTER_DATE": date,
            "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
     subprocess.run(["git", "-C", str(repo), *args], check=True, env=env, capture_output=True)
 
 
-def make_repo(tmp_path, commits, email=EMAIL):
+def make_repo(tmp_path, commits, email=EMAIL, tz="+0000"):
     """commits: list of (message, {path: text or None to delete})."""
     repo = tmp_path / "mirror"
     repo.mkdir()
@@ -30,7 +32,7 @@ def make_repo(tmp_path, commits, email=EMAIL):
                 f.parent.mkdir(parents=True, exist_ok=True)
                 f.write_text(text)
         git(repo, "add", "-A")
-        git(repo, "commit", "-q", "-m", message, email=email)
+        git(repo, "commit", "-q", "-m", message, email=email, tz=tz)
     return repo
 
 
@@ -104,6 +106,13 @@ def test_commit_by_a_real_email_fails(tmp_path):
     code, out = run(repo, make_map(tmp_path))
     assert code == 1
     assert out.startswith("IDENTITY") and REAL_EMAIL in out
+
+
+def test_commit_with_a_local_timezone_fails(tmp_path):
+    repo = make_repo(tmp_path, [("Add page", {"docs/page.md": "hello\n"})], tz="-0800")
+    code, out = run(repo, make_map(tmp_path))
+    assert code == 1
+    assert out.startswith("TIMEZONE") and "-0800" in out
 
 
 @pytest.mark.parametrize("private", ["map.txt", "identity.txt"])
