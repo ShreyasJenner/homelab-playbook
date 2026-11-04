@@ -27,7 +27,7 @@ Researched on 2026-10-30 and again on 2026-11-03 for Japanese and Chinese songs:
 - **Settings (UI):** embedding into tracks off (the default), auto-export `.lrc` + `.txt`, LRCLIB instance `https://lrclib.net`. Exporting both formats leaves exactly one file per track: the `.lrc` replaces a same-named `.txt`.
 - **Caddy:** `@lyrics host lyrics.example.com` → `reverse_proxy localhost:5411`.
 - **Homepage:** a tile in instance a (Media group, after Navidrome) with **no `siteMonitor`**: every URL answers 401 without the login, so a dot would always be red.
-- **Uptime Kuma:** HTTP monitor `http://localhost:5411/api/info` with basic auth (user, 2026-11-03). Whether "Kuma Alert" is ticked is Unverified.
+- **Uptime Kuma:** HTTP monitor `http://localhost:5411/api/info` with basic auth and the "Kuma Alert" notification ticked (user, 2026-11-03).
 - In `DEFAULT_STACKS` (after `navidrome`). Restic backs up `~/docker/lrcget` (database and `tried-ids.txt`) with the stack stopped, and the `.lrc`/`.txt` files with the music.
 
 ### The hourly fetch: once per track
@@ -43,7 +43,7 @@ Researched on 2026-10-30 and again on 2026-11-03 for Japanese and Chinese songs:
 
 **A miss is never retried.** The user chose this to keep the load off LRCLIB for lyrics that probably don't exist. To retry a track, use the UI (search or download). `lrcget-fetch.py --seed` records every current no-lyrics track as tried without fetching anything.
 
-**Backfill, 2026-11-03:** the script's first run tried all 1,381 tracks that had no lyrics, in 20 minutes: **999 got lyrics, 382 missed**. Before that, 932 tracks already had sidecars (901 `.lrc`, 33 `.txt` from earlier use), and a Japanese album fetched from the UI came out right (user).
+**Backfill, 2026-11-03:** the script's first run tried all 1,381 tracks that had no lyrics, in 20 minutes: **999 got lyrics, 382 missed**. Before that, 932 tracks already had sidecars (901 `.lrc`, 33 `.txt` from earlier use), and a Japanese album fetched from the UI came out right (user). The first timer run after the backfill (22:15) logged `nothing new (382 tracks without lyrics, all tried before)`, so the misses weren't asked about again.
 
 ```bash
 systemctl list-timers --no-pager | grep lrcget        # next run
