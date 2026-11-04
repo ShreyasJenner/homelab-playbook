@@ -30,12 +30,13 @@ It came out of the Authentik dead end (2026-10-11). The wish was "a sort of home
 | `PORT` (host network, so this is the host port) | 9640 | 9641 |
 | `HOMEPAGE_ALLOWED_HOSTS` | `dasha.example.com` | `dashb.example.com` |
 | Config | `config_a/` | `config_b/` |
-| Tiles | Grafana, Uptime Kuma, ntfy, Nextcloud, Mindwtr, Actual Budget, Memos, Gitea, Navidrome, Jellyfin, Invidious, Redlib (rla) | Nextcloud, Gitea, Navidrome, Jellyfin, Invidious, Kavita, Redlib (rlb) |
+| Tiles | Grafana, Uptime Kuma, ntfy, Nextcloud, Mindwtr, Actual Budget, Memos, Gitea, Navidrome, LRCGET, Jellyfin, Invidious, Redlib (rla) | Nextcloud, Gitea, Navidrome, Jellyfin, Invidious, Kavita, Redlib (rlb) |
 
 - Every tile's `href` is `https://<name>.example.com`, and every `siteMonitor` is `http://localhost:<port>`. Because Homepage is on the host network, it checks the same ports Caddy uses. Nextcloud's monitor uses `/status.php`, because `/` returns 500 to a check.
 - No widgets, so no API keys in the config.
 - YAML edits apply on a page refresh. Compose or `.env` changes need `sudo docker compose up -d`.
 - `services.yaml` layout: groups at column 0, each service as `  - <name>:` (2 spaces, then the dash), and its fields at 6 spaces. Spaces only. (Seen in `config_a` on 2026-11-01; the page used to say 4 and 8.)
+- The LRCGET tile (added 2026-11-03, icon `mdi-microphone-variant`) has no `siteMonitor`: every LRCGET URL needs its login, so the dot would always be red. Uptime Kuma checks it instead.
 
 ## Gaps
 

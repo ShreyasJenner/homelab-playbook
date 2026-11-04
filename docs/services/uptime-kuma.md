@@ -39,6 +39,7 @@ All HTTP, all every 60 s, all against `localhost`, all with the "Kuma Alert" ntf
 | Actual Budget | `http://localhost:5006/health` |
 | Jellyfin | `http://localhost:8167/health` |
 | Vaultwarden | `http://localhost:9734/alive` |
+| LRCGET | `http://localhost:5411/api/info`, with basic auth `alice` / `<LRCGET_PASSWORD>` (added 2026-11-03; "Kuma Alert" ticked: Unverified) |
 | Healthcheck | `<HEALTHCHECKS_PING_URL>` (an `hc-ping.com` URL) |
 
 - **"Healthcheck"** is a dead-man's switch. Kuma pings healthchecks.io, and if the pings stop (the host, Kuma or the home internet is down), healthchecks.io **emails** the user. It's the one alert that needs neither ntfy nor Tailscale. Kuma pings every 60 s (`kuma.db`, 2026-10-28). Per the user, healthchecks.io waits through 2 more missed 3-minute periods before it mails, so the nightly 3–4 minute backup stop doesn't set it off. The 3 minutes is presumably the period set on healthchecks.io; check there before relying on the exact timing. On 2026-11-01 the "down" email came at 02:40, only about 3 minutes after Kuma stopped (02:37:16), which suggests a shorter grace than that (follow-up 41). **A long backup does set it off:** the email then means the stacks are still stopped for the backup, not that the host is down ([incident](../incidents/2026-11-01-backup-downtime-after-hardlink-conversion.md)). The ping URL is a credential; the real value is in the monitor's settings in Kuma (`kuma.db`).

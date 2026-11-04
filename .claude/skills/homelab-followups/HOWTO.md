@@ -149,6 +149,17 @@ r=$(iw dev wlp130s0 link | awk '/rx bitrate/{print int($3)}')
 ```
 `rx bitrate` is the rate of the last received frame, so it can dip briefly; alert only after two low readings in a row, or reconnect automatically (`nmcli connection down HomeWiFi; sleep 3; nmcli connection up HomeWiFi`) once the alert has proved reliable. The ntfy topic and token are in ntfy's config; don't print them. Check: the script stays quiet while `rx bitrate` is in the hundreds.
 
+**43. ntfy alert when the lyrics fetch fails.** Create `/etc/systemd/system/lrcget-fetch-failed.service`:
+```ini
+[Unit]
+Description=Alert: lrcget-fetch failed
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -fsS -m 10 -H "Authorization: Bearer <NTFY_TOKEN>" -d "lrcget-fetch failed on homelab: journalctl -u lrcget-fetch" https://ntfyhub.example.com/<TOPIC>
+```
+Then add `OnFailure=lrcget-fetch-failed.service` under `[Unit]` in `lrcget-fetch.service`, and run `sudo systemctl daemon-reload`. The topic and token are in ntfy's config; don't print them, and keep the unit `chmod 600` since it holds the token. Check: `sudo systemctl start lrcget-fetch-failed.service` sends a push. Undo: remove the `OnFailure=` line and the unit, then `daemon-reload`.
+
 **36. MagicDNS SERVFAIL on the server.** Read-only:
 ```bash
 for n in manga.example.com example.com homelab.tail0000.ts.net; do echo "$n: $(dig @100.100.100.100 $n +tries=1 +time=3 | grep -o 'status: [A-Z]*')"; done

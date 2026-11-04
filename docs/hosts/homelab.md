@@ -81,6 +81,7 @@ Every stack is a Compose project in `~/docker/<stack>/`, with its config and dat
 | `invidious` | `invidious-invidious-1`, `invidious-companion-1`, `invidious-invidious-db-1` | [Invidious](../services/invidious.md) |
 | `jellyfin` | `jellyfin` | [Jellyfin](../services/jellyfin.md) |
 | `kavita` | `kavita` | [Kavita](../services/kavita.md) |
+| `lrcget` | `lrcget` | [LRCGET web](../services/lrcget.md) (plus `lrcget-fetch.timer` on the host) |
 | `memos` | `memos` | [Memos](../services/memos.md) |
 | `mindwtr` | `mindwtr-app`, `mindwtr-cloud` | [Mindwtr](../services/mindwtr.md) |
 | `monitoring` | `grafana`, `prometheus`, `loki`, `alloy`, `node-exporter`, `cadvisor` | [Monitoring stack](../services/monitoring.md) |
@@ -104,7 +105,7 @@ The procedure is in the runbook [Updating containers](../runbooks/updating-conta
 
 Commands: `up` (`up -d`), `stop`, `down`, `restart` (doesn't pick up compose changes; use `up`), `pull`, `update` (`pull`, then `up -d`; after the loop, `docker image prune -f`), `ps`, `logs` (`-f --tail 50`), `list`. With no stack names it acts on the `DEFAULT_STACKS` list in the script. A stack that fails prints `!! <stack> failed` and the loop carries on; the exit code is 1 if anything failed.
 
-Since 2026-10-30 (follow-up 12, verified that day), `DEFAULT_STACKS` holds every live stack (17, with `gitea` and `vaultwarden` added; `materialious` is commented out). The same day, unused images (51 GB) and build cache (20 GB) were pruned: `/` went from 170 GB to 104 GB used. The leftover stack folders above no longer have images.
+Since 2026-10-30 (follow-up 12, verified that day), `DEFAULT_STACKS` holds every live stack (17, with `gitea` and `vaultwarden` added; `materialious` is commented out). `lrcget` was added on 2026-11-03, making 18. The same day, unused images (51 GB) and build cache (20 GB) were pruned: `/` went from 170 GB to 104 GB used. The leftover stack folders above no longer have images.
 
 Known gaps in the script:
 - Almost every image follows `latest` (Gitea is pinned), so an update can pull a release with breaking config changes.

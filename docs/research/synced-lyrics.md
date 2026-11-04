@@ -17,6 +17,8 @@ Repo numbers are from the GitHub API on **2026-11-03** unless dated otherwise. "
 
 ## Summary
 
+**Installed 2026-11-03:** [LRCGET web](../services/lrcget.md), with a once-per-track hourly fetch instead of the retry-every-run timer sketched below.
+
 **Chosen setup (2026-11-03):** LRCGET web's automatic exact-match LRCLIB pass (part 1 below, from the hourly timer), plus a manual workflow for whatever it misses. lrcmux and the review pass are dropped. For the manual part, the user runs LDDC on their Arch Linux desktop, copies the downloaded `.lrc` files to the host, and pairs them with the [pairing script](#pairing-script). A self-hosted web UI is skipped for now. The best one found is the lrcmux frontend, with its API, but it's weak: one result per search, no source choice, no album mode, and no download button in a released image yet ([Manual web UI](#manual-web-ui)). It will be reconsidered when lrcmux tags a release with downloads. The ranking below stays as the record of the research.
 
 1. **Recommended: a three-part chain.** No single tool does LRCLIB first, CJK fallback, and a review queue, so this joins two existing tools with one small script.

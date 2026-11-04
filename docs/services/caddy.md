@@ -63,6 +63,7 @@ All are `https://<host>.example.com` → `localhost:<port>`.
 | `rla` / `rlb` | 8943 / 8941 | Redlib (`redlib-shreyas` / `redlib-bob`) |
 | `gitea` | 8310 | Gitea web (SSH goes through Tailscale Serve) |
 | `dasha` / `dashb` | 9640 / 9641 | Homepage instances a / b (host network) |
+| `lyrics` | 5411 | LRCGET web (binds `127.0.0.1` only) |
 
 Euro-Office (`9917`) has no Caddy route. It's reached only through Funnel `:8443`.
 

@@ -19,7 +19,7 @@ Streams the music library to the browser and to phones through Subsonic clients.
 
 Lightweight, music-only, and it speaks the Subsonic API, so many iOS clients work with it (play:Sub, Substreamer, Amperfy). It was compared with Jellyfin on 2026-07-18 and kept for music. [Jellyfin](jellyfin.md) came later for video only.
 
-Synced lyrics (`.lrc` files next to the tracks) were researched on 2026-10-30, and again on 2026-11-03 for Japanese and Chinese songs: [Research: synced lyrics](../research/synced-lyrics.md).
+Synced lyrics (`.lrc` files next to the tracks) were researched on 2026-10-30, and again on 2026-11-03 for Japanese and Chinese songs: [Research: synced lyrics](../research/synced-lyrics.md). Since 2026-11-03, [LRCGET web](lrcget.md) writes them, and Navidrome reads them from its read-only mount with no change.
 
 ## How it's set up
 
