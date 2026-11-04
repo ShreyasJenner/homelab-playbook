@@ -67,3 +67,11 @@ _Avoid_: Decision log, design doc
 **Unverified**:
 Content taken from a chat that has not yet been checked against the live host.
 _Avoid_: Draft, unconfirmed
+
+**Mirror**:
+The public copy of the Playbook, with every identifying detail swapped for a stand-in. Its history follows the Playbook's commit for commit.
+_Avoid_: Sandbox, public repo, fork
+
+**Stand-in**:
+A made-up value that replaces an identifying detail, the same everywhere it appears.
+_Avoid_: Fake, placeholder (a placeholder such as `<JWT_SECRET>` marks where a secret was left out)
