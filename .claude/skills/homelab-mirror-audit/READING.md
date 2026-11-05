@@ -15,8 +15,9 @@ The owner publishes these on purpose (ADR 0005). Don't report them, alone or com
 - the owner's real name: the commit name, the GitHub account and handle, the noreply email
 - the time zone: zone names, UTC offsets, commit hours, DST changes
 - the home's situation: the 2026-09 network move, a router the owner can't administer, Wi-Fi only, chat titles
+- that a blog exists under the same name
 
-A route that uses them to recover something still hidden (the domain, an address, the ISP, an account, a place finer than the time zone) is a finding, and it is filed under that hidden thing.
+A route that uses them to recover something still hidden (the domain, an address, the ISP, an account, a real title, a place finer than the time zone) is a finding, and it is filed under that hidden thing.
 
 ## The reading
 

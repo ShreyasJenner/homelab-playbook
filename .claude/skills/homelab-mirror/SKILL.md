@@ -24,8 +24,10 @@ Stand-ins follow the **Public** section of [`homelab-blog`](../homelab-blog/SKIL
 2. **Review the new commits.** Read every commit listed in `<scratchpad>/mirror/new-commits.txt` with the command the build printed: the full diff and the message. Patterns can't catch these, so you're the reader that does:
    - media titles and their database IDs
    - people's names and handles
-   - places and the ISP
+   - places finer than the time zone, the ISP
    - device names, account and bucket names
+
+   What ADR 0005 publishes on purpose (the "Not findings" in [`homelab-mirror-audit/READING.md`](../homelab-mirror-audit/READING.md)) needs no stand-in.
 
    Propose each find as a map line (`real==>stand-in`) and put them to the user together. Add the accepted ones to `map.txt` and go back to step 1.
 
