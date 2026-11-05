@@ -3,7 +3,7 @@
 Homelab changes on homelab, not Playbook writing. This list is the single record of their status; the drafted commands for open ones are in [`HOWTO.md`](HOWTO.md). Moved here from the gitignored `.scratch/playbook/plan.md` on 2026-10-29, so it travels with the repo. Numbers are stable: done items stay, marked done.
 
 1. Reserve `198.51.100.10` for homelab in the router (DHCP over Wi-Fi; the Euro-Office connector embeds the IP). **Blocked (2026-10-30):** there's no admin access to the router. Follow-up 37 removes the need for it.
-2. Turn on Nextcloud 2FA. `twofactor_totp` is already enabled; accounts just need to enrol. Nextcloud is public.
+2. ~~Turn on Nextcloud 2FA~~: **done (2026-11-05).** All three accounts (`alice`, `Shreyas`, `bob`) were already enrolled in TOTP and had backup codes. `occ twofactorauth:enforce --on` now enforces 2FA for every account, and a login through the public URL asks for the code. The backup codes are in Vaultwarden. Pages: `docs/services/nextcloud.md`, `docs/services/tailscale.md`.
 4. Bind Docker-published ports to `127.0.0.1` (open LAN-exposure incident; Nextcloud/Euro-Office LAN-IP coupling first).
 5. Restic password: confirm the Bitwarden offline cache works (Lock, not Log out, with PIN/biometrics; test in airplane mode), and consider an independent copy. Without it, both backups (HDD repo and B2) are unreadable.
 6. `backup/vns` and `media/games` (Nextcloud external storage) are in no backup. TV, anime and movies aren't either (by choice?).

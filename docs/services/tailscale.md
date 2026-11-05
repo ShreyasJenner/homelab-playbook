@@ -58,7 +58,7 @@ These caused most of the past outages. See the [runbook](../runbooks/service-url
 - **`--https` speaks HTTP behind TLS, so SSH through it closes at once.** SSH needs `--tcp`. Funnel can't carry SSH at all.
 - **A container can't reliably reach its own host's Funnel URL** (the request times out). That's why Nextcloud and Euro-Office call each other on the LAN address, and only the browser uses the Funnel URL.
 - **`--set-path` doesn't strip the path prefix,** so apps without a base-URL setting break under a subpath. This sank the Collabora `/collabora` attempt.
-- **Funnel exposes Nextcloud's whole login page**, not only share links. Nextcloud 2FA is off (follow-up 2).
+- **Funnel exposes Nextcloud's whole login page**, not only share links. Nextcloud therefore enforces 2FA for every account (follow-up 2, done and verified 2026-11-05).
 - When the text output of `serve status` is unclear, `sudo tailscale serve status --json` shows the exact `Proxy` target.
 
 ### DNS on homelab

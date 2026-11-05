@@ -20,8 +20,6 @@ sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' vaultwarden |
 ```
 2FA: web vault → Settings → Security → Two-step login → Authenticator app. Keep the recovery code outside Vaultwarden.
 
-**2. Nextcloud 2FA.** Each account turns it on under Personal settings → Security → TOTP. Check with `sudo docker exec -u www-data nextcloud_app php occ twofactorauth:state <USER>`. DAV clients then need app passwords. Run `occ twofactorauth:enforce --on` only after everyone is set up.
-
 **18. Gitea URLs and 2FA.** `SSH_DOMAIN` defaults to `DOMAIN`, so pin it to `gitea` to keep the `git@gitea:` alias URLs working.
 ```bash
 F=~/docker/gitea/gitea/gitea/conf/app.ini

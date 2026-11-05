@@ -10,7 +10,7 @@ Config:     ~/docker/nextcloud/ (docker-compose.yml; data/ → /var/www/html, th
 Depends on: nextcloud_db (MariaDB); Tailscale Funnel; the 4 TB HDD (external storage);
             Euro-Office for document editing; the host's LAN address (Euro-Office calls)
 Per-User:   no; one instance, one account per User (plus admin)
-Verified:   2026-10-28 (config, apps, mounts); compose details unverified
+Verified:   2026-10-28 (config, apps, mounts); 2026-11-05 (2FA, version 35.0.1); compose details unverified
 ```
 
 ## What it's for
@@ -56,7 +56,7 @@ User files are at `~/docker/nextcloud/data/data/<user>/files/` on the host. The 
 **Enabled apps of note:**
 - `eurooffice` 11.0.6: the document connector.
 - `richdocumentscode`: the built-in Collabora server, a leftover kept on purpose.
-- `twofactor_totp` and `twofactor_backupcodes`: installed, but **no account has enrolled in 2FA**, although the login page is public.
+- `twofactor_totp` 17.1.0 and `twofactor_backupcodes` 2.0.0-dev.0: **2FA is enforced for all users** (`occ twofactorauth:enforce --on`, follow-up 2). All three accounts have TOTP and backup codes. `bob` enrolled on 2026-11-04. Verified 2026-11-05 with `occ twofactorauth:state` and a login through the public URL. The backup codes are kept in Vaultwarden, which has no 2FA of its own yet (follow-up 22). A new account has to set up TOTP at its first login. A client that logs in with the account password (WebDAV, CalDAV or CardDAV) needs an app password instead. The desktop and iOS apps already use app passwords through Login Flow. Undo: `occ twofactorauth:enforce --off`.
 
 Retired connectors `richdocuments` and `onlyoffice` are also still installed. These leftovers are recorded, not cleaned up; see the [Collabora](collabora.md) and [ONLYOFFICE](onlyoffice.md) pages.
 
