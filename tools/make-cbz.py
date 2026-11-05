@@ -112,8 +112,9 @@ def fmt(number, width=0):
 
 
 def chapter_number(name):
-    """The chapter number of a folder: the last number in its name."""
-    found = re.findall(r"\d+(?:\.\d+)?", name)
+    """The chapter number of a folder: the last number in its name, after
+    dropping a trailing "v<N>" ("c100v2", "c100 v2")."""
+    found = re.findall(r"\d+(?:\.\d+)?", re.sub(r"(?<=\d)[\s_-]*v\d+$", "", name, flags=re.I))
     if not found:
         raise Error(f"chapter folder {name!r} has no number in its name")
     number = Decimal(found[-1]).normalize()

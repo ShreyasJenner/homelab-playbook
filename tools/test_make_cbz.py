@@ -43,6 +43,9 @@ def info(cbz):
 
 @pytest.mark.parametrize("name, number", [
     ("c001", D(1)), ("Chapter 10.5", D("10.5")), ("Vol 2 Ch 7", D(7)), ("c100", D(100)), ("c010.50", D("10.5")),
+    # A trailing "v<N>" is not the chapter number.
+    ("Golden Kamuy V10C100v2", D(100)), ("Golden Kamuy V01C02", D(2)),
+    ("c007 v2", D(7)), ("c007_V3", D(7)), ("Chapter 10.5v2", D("10.5")),
 ])
 def test_chapter_number(name, number):
     assert mc.chapter_number(name) == number
