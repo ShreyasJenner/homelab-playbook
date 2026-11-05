@@ -10,7 +10,7 @@ sudo grep -rno '198\.51\.100\.10:[0-9]*' ~/docker --include='*.yml' --include='*
 ```
 Check each stack: its Caddy URL loads and its Kuma monitor stays green. When everything is done, the LAN-exposure incident can be resolved.
 
-**16 then 22. Vaultwarden DOMAIN, then 2FA.**
+**16. Vaultwarden DOMAIN** (needed before adding a passkey or security key; TOTP 2FA is already on, follow-up 22). `grep -o 'DOMAIN=…'` found nothing on 2026-11-05, so it's probably YAML form.
 ```bash
 cd ~/docker/vaultwarden
 grep -n 'DOMAIN' docker-compose.yml .env        # DOMAIN lines only
@@ -18,7 +18,6 @@ nano <that file>                                # DOMAIN=https://vault.example.c
 sudo docker compose up -d
 sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' vaultwarden | grep '^DOMAIN='
 ```
-2FA: web vault → Settings → Security → Two-step login → Authenticator app. Keep the recovery code outside Vaultwarden.
 
 **18. Gitea URLs and 2FA.** `SSH_DOMAIN` defaults to `DOMAIN`, so pin it to `gitea` to keep the `git@gitea:` alias URLs working.
 ```bash

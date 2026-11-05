@@ -22,7 +22,7 @@ Homelab changes on homelab, not Playbook writing. This list is the single record
 19. ~~Bitwarden URI match~~: not an issue. The default is Base domain, and the user sets Host on each saved login.
 20. `redlib-shreyas` and `redlib-bob` are both `unhealthy` (2026-10-28). Investigate.
 21. Add to the LAN-exposure incident: Gitea `8310` and **SSH `8312`**, Memos `9418`, Mindwtr `6301`/`6302`, Actual Budget `5006`, Invidious `3000`.
-22. Turn on Vaultwarden 2FA (it's off). Do follow-up 16 (`DOMAIN`) first if using a passkey or security key.
+22. ~~Turn on Vaultwarden 2FA~~: **done (2026-11-05).** There are two accounts, not one: ShreyasJenner and bob. Both now use TOTP and have a recovery code, kept in Proton Drive. They aren't kept in Nextcloud, because Nextcloud's backup codes are in Vaultwarden. Checked with read-only `sqlite3` queries. WebAuthn still waits for follow-up 16. Pages: `docs/services/vaultwarden.md`, `docs/services/nextcloud.md`.
 23. **Invidious's Postgres is a named volume (`invidious_postgresdata`), outside `~/docker`, so restic doesn't back it up.** Bind-mount it under `~/docker/invidious`, or `pg_dump` it before the backup.
 24. Jellyfin's discovery port is published as `7461/udp`, not the default `7359`. Fix `UDP_HOST_PORT` in `~/docker/jellyfin/.env` if LAN discovery is wanted.
 25. Redlib: the healthcheck uses `wget`, which isn't in the image, so it's always "unhealthy". Fix or remove the healthcheck. Browsing works (user, 2026-10-28), and the startup 403 is noise. ~~The polak14 fork is temporary: move back to upstream~~: **done (2026-10-30)**, built from `redlib-org/redlib` v0.40.0 (incident `docs/incidents/2026-10-30-redlib-reddit-blocks-home-ip.md`). The healthcheck part is still open.

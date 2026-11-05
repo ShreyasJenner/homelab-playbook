@@ -8,8 +8,8 @@ URL:        https://vault.example.com (health: /alive)
 Config:     ~/docker/vaultwarden/ (docker-compose.yml; .env with ADMIN_TOKEN; data/ → /data:
             db.sqlite3, rsa_key*, attachments)
 Depends on: Caddy (Bitwarden clients require HTTPS); Tailscale on every client that syncs
-Per-User:   no; ShreyasJenner's vault only
-Verified:   2026-10-28
+Per-User:   no; one instance, one account per User (ShreyasJenner, bob)
+Verified:   2026-10-28; 2026-11-05 (accounts, 2FA)
 ```
 
 ## What it's for
@@ -26,6 +26,9 @@ It was on the original wish list for the server. On 2026-06-27 it was compared w
 - Env (2026-10-28): `SIGNUPS_ALLOWED=false`, `INVITATIONS_ALLOWED=false`, `LOG_LEVEL=warn`, `TZ=Etc/UTC`.
 - **`ADMIN_TOKEN` is set in `.env`, so the admin panel (`/admin`) is enabled.** The token is an Argon2 hash; keep it single-quoted in `.env` because of its `$` signs. There's no `data/config.json`. Settings saved in the admin panel would go there and override the env vars.
 - **Data** is a bind mount, `~/docker/vaultwarden/data`, so restic backs it up (a cold copy at 02:30).
+- **Accounts:** ShreyasJenner and bob, both created on 2026-10-15. Each User has their own vault. Verified 2026-11-05 from the `users` table.
+- **2FA (follow-up 22, done 2026-11-05):** both accounts use an authenticator app (TOTP) and have a recovery code. Verified 2026-11-05 with read-only `sqlite3` queries: one enabled `twofactor` row per user, and `totp_recover` set on both. Vaultwarden can't enforce 2FA server-wide, so a new account has to turn it on itself, under Settings → Security → Two-step login. WebAuthn (passkey or security key) waits for follow-up 16, because it's bound to `DOMAIN`.
+  - **The recovery codes are in Proton Drive**, not in Vaultwarden or Nextcloud. The Nextcloud backup codes are in Vaultwarden, so keeping these recovery codes in Nextcloud would lock both services if the phone were lost. Keep them somewhere that needs neither service.
 - Uptime Kuma checks `http://localhost:9734/alive`, with ntfy alerts.
 - **Updates** come through a plain `stacks.sh update`: it's in `DEFAULT_STACKS` since 2026-10-30 (follow-up 12, done). That day's update found nothing newer: the container runs 1.37.4 (image built 2026-10-05), the current `latest`. Verified 2026-10-30.
 
@@ -36,8 +39,7 @@ It was on the original wish list for the server. On 2026-06-27 it was compared w
 
 ## Known issues
 
-- **`DOMAIN` is still the old `https://homelab.tail0000.ts.net:9758`.** That's the pre-Caddy address, and its port isn't even the real one. Vaultwarden uses `DOMAIN` for WebAuthn/passkeys, attachment links, email links and the admin page. Set it to `https://vault.example.com`, then `sudo docker compose up -d` (follow-up 16). Do this before using a passkey or security key for 2FA.
-- **2FA is off** on the vault account (follow-up 22).
+- **`DOMAIN` is still the old `https://homelab.tail0000.ts.net:9758`.** That's the pre-Caddy address, and its port isn't even the real one. Vaultwarden uses `DOMAIN` for WebAuthn/passkeys, attachment links, email links and the admin page. Set it to `https://vault.example.com`, then `sudo docker compose up -d` (follow-up 16). Do this before using a passkey or security key for 2FA. The `DOMAIN` grep on 2026-11-05 found no `DOMAIN=` line in `docker-compose.yml` or `.env`, so it's probably written in YAML form (`DOMAIN: …`). Check with `grep -n 'DOMAIN'`.
 - **The restic password must not live only in Vaultwarden.** Restoring Vaultwarden needs the restic password, so that would be circular (follow-up 5).
 
 ## Runbooks
