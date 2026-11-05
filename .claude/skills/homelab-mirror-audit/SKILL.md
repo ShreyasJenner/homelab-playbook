@@ -15,7 +15,7 @@ Report each pass to the user in a few lines when it finishes.
 1. **Pass 1: leak check.** Run `audit.py check <scratchpad>/audit`. It rebuilds the Mirror with `mirror.py build`, runs the leak check on the checkout itself, and compares the checkout with the build. Every leak line is a blocking finding. A checkout that differs from the build isn't what the current Playbook and map produce: say so, and audit the checkout anyway, since it's what a push sends.
 
    Done when you have all three results.
-2. **Pass 2: metadata.** Run `audit.py meta` and judge each section: a commit name that looks like a person's real name (the push puts it beside the GitHub account); offsets that change on a DST date, which names a region; the hours commits land at; refs, tags, notes or stash beyond `main`; signatures and extra headers; non-text files and their EXIF tags; symlinks and submodules.
+2. **Pass 2: metadata.** Run `audit.py meta` and judge each section: a commit name or email that differs from `identity.txt`; refs, tags, notes or stash beyond `main`; signatures and extra headers; non-text files and their EXIF tags; symlinks and submodules. The real name, the offsets and the commit hours are published on purpose (READING.md, "Not findings"): don't ask about them or report them.
 
    Done when every section has a finding or a "nothing here".
 3. **Ask about usage.** Run `audit.py prepare <scratchpad>/audit/read`. It writes the reading for passes 3–5 and prints its size. Ask the user whether there's enough usage left to run those passes as subagents, quoting the sizes it printed:

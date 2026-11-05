@@ -9,6 +9,15 @@ Passes 3, 4 and 5 of the Mirror audit, and what every pass shares: the rules, th
 - **Change nothing:** no edits to the Mirror, the map or any tracked Playbook file, no commits, no pushes. Your notes go in the reading directory.
 - **Stay offline.** Work an attack through on paper: name the public source an attacker would use and what the Mirror gives them to search it with. A lookup that worked would bring a real value into the session.
 
+## Not findings
+
+The owner publishes these on purpose (ADR 0005). Don't report them, alone or combined only with each other:
+- the owner's real name: the commit name, the GitHub account and handle, the noreply email
+- the time zone: zone names, UTC offsets, commit hours, DST changes
+- the home's situation: the 2026-09 network move, a router the owner can't administer, Wi-Fi only, chat titles
+
+A route that uses them to recover something still hidden (the domain, an address, the ISP, an account, a place finer than the time zone) is a finding, and it is filed under that hidden thing.
+
 ## The reading
 
 `audit.py prepare` wrote three files to the reading directory:
@@ -40,7 +49,7 @@ Write each finding to your `pass-<N>.md` the moment you have it:
 A **tell** is a detail that gives a real value away, alone or with another. Tells have taken these shapes:
 
 - **Half a stand-in**: a stand-in around a real part, such as a real label inside a stand-in name or address, or a real summary or year beside a stand-in title.
-- **A path**: the map rewrites file contents and commit messages, never file or folder names.
+- **A path**: a file or folder name with a real value that no rule matches. `mirror.py` applies the map to file names too, so a path a rule matches is already a stand-in.
 - **A date that finds a record**: a registration, renewal, certificate or account date beside something an attacker can test, such as a name that resolves publicly. Newly-registered-domain lists, certificate-transparency logs and RDAP turn that pair into a short list.
 - **A fingerprint**: an exact plan size, interface layout or default host-name scheme that names a provider; an exact speed that narrows an ISP; commit dates whose offset changes on a DST date.
 - **Grammar left behind**: text that fitted the real value and not the stand-in: "a" before a vowel, a category word that belongs to the real service, a URL rewritten to a path that doesn't exist, a quote that no longer matches its source.
@@ -62,6 +71,6 @@ Done when both files are read to the end, every deleted file is accounted for, a
 
 ## Pass 5: the adversary
 
-You want to find the person behind this homelab. Use everything a push makes public: `tree.txt`, `messages.txt`, `delta.txt`, and `audit.py meta` for the metadata. Try to recover each target: the owner's identity, their location, their ISP, the real domain and any live address, other people, devices, account and bucket names, and the media they hold. Then test each claim the Mirror's README makes about what was left out. Work the combinations as well as single details: minor findings that together recover a value make one blocking finding.
+You want to find the person behind this homelab. Use everything a push makes public: `tree.txt`, `messages.txt`, `delta.txt`, and `audit.py meta` for the metadata. The owner's name and time zone are given (see "Not findings"), so start from them. Try to recover each target: their location beyond the time zone, their ISP, the real domain and any live address, other people, devices, account and bucket names, and the media they hold. Then test each claim the Mirror's README makes about what was left out. Work the combinations as well as single details: minor findings that together recover a value make one blocking finding.
 
 Done when every target has an answer (recovered, narrowed to what, or not recoverable from the Mirror) with its route, and every combination you used is a finding.
