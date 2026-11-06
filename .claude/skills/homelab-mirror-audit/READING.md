@@ -19,6 +19,10 @@ The owner publishes these on purpose (ADR 0005). Don't report them, alone or com
 - the services the owner uses, named without an account name: Last.fm as the scrobble target, the cloud drives, healthchecks.io, B2. That a profile on one may carry the owner's name or handle follows from the name being published.
 - the certificate-log route to the domain: the dates on the Caddy pages and incidents beside its wildcard certificate (ADR 0005). Any other route to the domain is still a finding.
 - the Funnel route to the tailnet and machine names: the Funnel ports, the services behind them, and the dates Funnel and HTTPS were first turned on, beside the public certificate logs (ADR 0005). Any other route to those names is still a finding.
+- the writing's locale: British spelling, "mobile data", the US App Store storefront. A place word, a regional service or a spelling tied to something finer than the time zone is still a finding.
+- the home line's general shape: a symmetric speed given as "hundreds of Mbps", an ISP app that shows the WAN IP, a sticky public IP, CGNAT on the previous network. The ISP's name, an exact plan speed, or a product or app name that belongs to one ISP is still a finding.
+- the document server's own services: Euro-Office's `example` service and `adminpanel` named on its page beside the accepted Funnel route. A route to its live address other than the Funnel one is still a finding.
+- `192.168` as the leak check's example pattern, in its code, tests and commit message. The LAN's third octet or a real LAN address is still a finding.
 
 A route that uses them to recover something still hidden (the domain, an address, the ISP, an account, a real title, a place finer than the time zone) is a finding, and it is filed under that hidden thing.
 
