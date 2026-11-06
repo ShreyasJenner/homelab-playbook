@@ -42,8 +42,15 @@ def make_map(tmp_path, *rules):
     return m
 
 
-def run(repo, map_file, env=None):
-    r = subprocess.run([sys.executable, "-I", str(SCRIPT), str(repo), str(map_file), EMAIL],
+def make_forbidden(tmp_path, *terms):
+    f = tmp_path / "forbidden.txt"
+    f.write_text("# a comment\n\n" + "".join(t + "\n" for t in terms))
+    return f
+
+
+def run(repo, map_file, env=None, forbidden=None):
+    extra = [str(forbidden)] if forbidden else []
+    r = subprocess.run([sys.executable, "-I", str(SCRIPT), str(repo), str(map_file), EMAIL, *extra],
                        capture_output=True, text=True, env=env)
     return r.returncode, r.stdout
 
@@ -115,7 +122,30 @@ def test_commit_with_a_local_timezone_fails(tmp_path):
     assert out.startswith("TIMEZONE") and "-0800" in out
 
 
-@pytest.mark.parametrize("private", ["map.txt", "identity.txt"])
+@pytest.mark.parametrize("place", ["file", "message", "file name"])
+def test_forbidden_term_anywhere_fails(tmp_path, place):
+    commits = {"file": ("Add page", {"docs/page.md": "Grabs go to the Harbourload client.\n"}),
+               "message": ("Fix the harbourload client", {"docs/page.md": "hello\n"}),
+               "file name": ("Add page", {"docs/harbourload.md": "hello\n"})}
+    repo = make_repo(tmp_path, [commits[place]])
+    code, out = run(repo, make_map(tmp_path), forbidden=make_forbidden(tmp_path, "Harbourload"))
+    assert code == 1
+    assert out.startswith("FORBIDDEN") and "harbourload" in out.lower()
+
+
+def test_forbidden_literal_matches_from_a_word_start_and_regex_keeps_its_case(tmp_path):
+    repo = make_repo(tmp_path, [("Add page", {"docs/page.md": "a watchtower, and the TOWER block\n"})])
+    code, out = run(repo, make_map(tmp_path), forbidden=make_forbidden(tmp_path, "tower", r"regex:\bTOWER\b"))
+    assert code == 1
+    assert out.count("FORBIDDEN") == 2  # "tower" in "TOWER" and the regex; not "watchtower"
+    (tmp_path / "two").mkdir()
+    repo2 = make_repo(tmp_path / "two",[("Add page", {"docs/page.md": "a watchtower, and a tower\n"})])
+    code, out = run(repo2, make_map(tmp_path), forbidden=make_forbidden(tmp_path, r"regex:\bTOWER\b"))
+    assert (code, out) == (0, "")
+
+
+@pytest.mark.parametrize("private", ["map.txt", "identity.txt", "hidden.md", "cuts.txt", "forbidden.txt",
+                                     "leave-out.txt"])
 def test_private_file_in_any_commit_fails(tmp_path, private):
     path = f".claude/skills/homelab-mirror/{private}"
     repo = make_repo(tmp_path, [("Add it", {path: "# only a comment\n"}), ("Drop it", {path: None})])

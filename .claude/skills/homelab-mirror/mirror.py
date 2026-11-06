@@ -14,10 +14,14 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PLAYBOOK = HERE.parents[2]
 MIRROR = Path(os.environ.get("HOMELAB_MIRROR", Path.home() / "dev/projects/github/homelab-playbook"))  # override: tests only
-MAP = HERE / "map.txt"
-PRIVATE = ("homelab-mirror/map.txt", "homelab-mirror/identity.txt")  # dropped wherever they have lived
-LEFT_OUT = ("blog/",)  # the blog drafts and SERIES.md, which records post URLs under the author's handle
-# identity.txt: "name: …", "email: …" (the GitHub noreply address), "remote: …" (the GitHub URL)
+MAP = HERE / "map.txt"              # real value ==> stand-in
+CUTS = HERE / "cuts.txt"            # passages to delete or rewrite, run on the Playbook's own text before the map
+LEAVE_OUT = HERE / "leave-out.txt"  # paths left out of every commit
+FORBIDDEN = HERE / "forbidden.txt"  # terms that must not appear anywhere in the Mirror
+NOTICE = HERE / "notice.md"         # the README every Mirror commit carries
+sys.path.insert(0, str(HERE))
+from leak_check import PRIVATE  # noqa: E402  dropped wherever they have lived
+# identity.txt: "name: …", "email: …", "remote: …" (the GitHub URL)
 IDENTITY = dict(line.split(": ", 1) for line in (HERE / "identity.txt").read_text().splitlines() if ": " in line)
 NAME, EMAIL, GITHUB = IDENTITY["name"], IDENTITY["email"], IDENTITY["remote"]
 
@@ -57,38 +61,74 @@ def rename_callback(rules_text):
             "return filename\n")
 
 
+def rules_text(path):
+    """The rules without comments and blank lines, which filter-repo would treat as rules. A rule needs a ==>:
+    without one, filter-repo would write ***REMOVED*** in its place."""
+    lines = [l for l in Path(path).read_text(encoding="utf-8").splitlines(keepends=True)
+             if l.strip() and not l.lstrip().startswith("#")]
+    bad = [l.strip() for l in lines if "==>" not in l]
+    if bad:
+        sys.exit(f"{Path(path).name}: a rule with no ==> (end it with ==> to delete the text): {bad[0][:60]}")
+    return "".join(lines)
+
+
+def leave_out_args(repo, leave_out):
+    """--path or --path-glob for each left-out path, and for every path a private file has lived at."""
+    args = [a for p in sorted({p for p in git(repo, "log", "--all", "--format=", "--name-only").splitlines()
+                               if p.endswith(PRIVATE)}) for a in ("--path", p)]
+    for line in Path(leave_out).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            args += ["--path-glob", line[5:]] if line.startswith("glob:") else ["--path", line]
+    return args
+
+
+def filter_repo(repo, *args):
+    r = subprocess.run(["git", "-C", str(repo), "filter-repo", "--force", "--quiet", *args],
+                       capture_output=True, text=True)
+    if r.returncode:
+        sys.exit(f"filter-repo failed:\n{r.stderr.strip()}")
+
+
+def rewrite(repo, work, cuts, map, leave_out, notice, name, email):
+    """Turn a clone of the Playbook into the Mirror, in two passes so the cuts see the Playbook's own text:
+    1. left-out paths go, and the cuts apply to contents and messages; commits left empty are dropped;
+    2. the map applies to contents, file names and messages, the identity and offset are replaced, and the
+       first commit gains the notice as README.md."""
+    work = Path(work)
+    work.mkdir(parents=True, exist_ok=True)
+    cut_rules, map_rules = work / "cuts.txt", work / "rules.txt"
+    cut_rules.write_text(rules_text(cuts), encoding="utf-8")
+    map_rules.write_text(rules_text(map), encoding="utf-8")
+
+    first = ["--invert-paths", *leave_out_args(repo, leave_out)]
+    if cut_rules.read_text(encoding="utf-8"):
+        first += ["--replace-text", str(cut_rules), "--replace-message", str(cut_rules)]
+    filter_repo(repo, *first)
+
+    blob = git(repo, "hash-object", "-w", str(notice))
+    filter_repo(repo, "--replace-text", str(map_rules), "--replace-message", str(map_rules),
+                "--filename-callback", rename_callback(map_rules.read_text(encoding="utf-8")),
+                "--name-callback", f"return {name.encode()!r}",
+                "--email-callback", f"return {email.encode()!r}",
+                "--commit-callback",
+                # Same instant, offset +0000: a local offset and its DST switch place the author.
+                "commit.author_date = commit.author_date.split()[0] + b' +0000'\n"
+                "commit.committer_date = commit.committer_date.split()[0] + b' +0000'\n"
+                "if not commit.parents:\n"
+                f"    commit.file_changes.append(FileChange(b'M', b'README.md', b'{blob}', b'100644'))\n")
+
+
 def build(work):
     work = Path(work)
     rebuilt = work / "rebuilt"
     shutil.rmtree(rebuilt, ignore_errors=True)
     work.mkdir(parents=True, exist_ok=True)
     git(PLAYBOOK, "clone", "-q", "--no-local", "--single-branch", "--branch", "main", str(PLAYBOOK), str(rebuilt))
-
-    rules = work / "rules.txt"  # the map without comments and blank lines, which filter-repo would treat as rules
-    rules.write_text("".join(l for l in MAP.read_text(encoding="utf-8").splitlines(keepends=True)
-                             if l.strip() and not l.lstrip().startswith("#")), encoding="utf-8")
-    notice = git(rebuilt, "hash-object", "-w", str(HERE / "notice.md"))
-    private_paths = sorted({p for p in git(rebuilt, "log", "--all", "--format=", "--name-only").splitlines()
-                        if p.endswith(PRIVATE)})
-
-    cmd = ["git", "-C", str(rebuilt), "filter-repo", "--force", "--quiet",
-           "--replace-text", str(rules), "--replace-message", str(rules),
-           "--filename-callback", rename_callback(rules.read_text(encoding="utf-8")),
-           "--name-callback", f"return {NAME.encode()!r}",
-           "--email-callback", f"return {EMAIL.encode()!r}",
-           "--commit-callback",
-           # Same instant, offset +0000: a local offset and its DST switch place the author.
-           "commit.author_date = commit.author_date.split()[0] + b' +0000'\n"
-           "commit.committer_date = commit.committer_date.split()[0] + b' +0000'\n"
-           "if not commit.parents:\n"
-           f"    commit.file_changes.append(FileChange(b'M', b'README.md', b'{notice}', b'100644'))\n"]
-    cmd += ["--invert-paths"] + [a for p in private_paths + list(LEFT_OUT) for a in ("--path", p)]
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode:
-        sys.exit(f"filter-repo failed:\n{r.stderr.strip()}")
+    rewrite(rebuilt, work, CUTS, MAP, LEAVE_OUT, NOTICE, NAME, EMAIL)
     git(rebuilt, "remote", "remove", "origin", check=False)
 
-    leaks = subprocess.run([sys.executable, "-I", str(HERE / "leak_check.py"), str(rebuilt), str(MAP), EMAIL],
+    leaks = subprocess.run([sys.executable, "-I", str(HERE / "leak_check.py"), str(rebuilt), str(MAP), EMAIL, str(FORBIDDEN)],
                            capture_output=True, text=True)
     if leaks.returncode:
         print(f"LEAKS: the build is blocked.\n{leaks.stdout}{leaks.stderr}", end="")

@@ -2,8 +2,10 @@
 
   python3 -I audit.py check   <work-dir>               pass 1: mirror.py build into <work-dir>, the leak check on the checkout, both compared
   python3 -I audit.py meta    [repo]                   pass 2: identities, dates, refs, headers, non-text files, file modes
-  python3 -I audit.py prepare <read-dir> [repo]        passes 3-5: tree.txt, messages.txt and delta.txt, and their size
-  python3 -I audit.py where   <categories.tsv> [repo]  pass 6: where each category occurs in the history and the final tree
+  python3 -I audit.py prepare <read-dir> [repo]        passes 3-4: tree.txt, messages.txt and delta.txt, and their size
+  python3 -I audit.py where   <categories.tsv> [repo]  pass 5: where each category occurs in the history and the final tree
+  python3 -I audit.py diff    <read-dir> [repo]        diff review: diff.txt and messages.txt, what changed since refs/audited/main
+  python3 -I audit.py mark    [repo]                   set refs/audited/main to main, and record the Hidden list categories it was read for
   python3 -I audit.py map     <stand-in>...            the map rules with that text on their stand-in or real side (line numbers only)
   python3 -I audit.py map --at <file>:<line>...        a line of the checkout, with the parts that came from a stand-in marked
                                                        (back-references included; a stand-in under 3 ASCII characters
@@ -84,7 +86,8 @@ def check(work):
                            capture_output=True, text=True)
     print("\n".join(redact(line) for line in (built.stdout + built.stderr).splitlines()))
     print("== leak check of the checkout itself")
-    leaks = subprocess.run([sys.executable, "-I", str(MIRROR_SKILL / "leak_check.py"), str(m.MIRROR), str(m.MAP), m.EMAIL],
+    leaks = subprocess.run([sys.executable, "-I", str(MIRROR_SKILL / "leak_check.py"), str(m.MIRROR), str(m.MAP), m.EMAIL,
+                            str(m.FORBIDDEN)],
                            capture_output=True, text=True)
     print("\n".join(redact(line) for line in (leaks.stdout + leaks.stderr).splitlines()) or "clean")
     rebuilt = Path(work) / "rebuilt"
@@ -120,8 +123,7 @@ def meta(repo, name, email):
     print(f"== identities ({len(rows)} commits on every ref)")
     print(f"names: {len(names)} distinct ({'; '.join(sorted(shape(n) for n in names))}); "
           f"all equal identity.txt's name: {names == {name}}")
-    print(f"emails: {len(emails)} distinct; all equal identity.txt's email: {emails == {email.lower()}}; "
-          f"all GitHub noreply: {all(e.endswith('@users.noreply.github.com') for e in emails)}")
+    print(f"emails: {len(emails)} distinct; all equal identity.txt's email: {emails == {email.lower()}}")
 
     print("== dates")
     offsets, first, last, changes, previous = collections.Counter(), {}, {}, [], None
@@ -193,7 +195,7 @@ def meta(repo, name, email):
           + " (120000 = symlink, 160000 = submodule)")
 
 
-# ---- passes 3-5 --------------------------------------------------------------------------
+# ---- passes 3-4 --------------------------------------------------------------------------
 
 def prepare(out, repo):
     out = Path(out)
@@ -237,11 +239,10 @@ def prepare(out, repo):
         text = (out / name).read_text(encoding="utf-8")
         total += len(text.encode())
         print(f"{name}: {len(text.encode()) // 1024} KB, {text.count(chr(10))} lines")
-    print(f"reading: about {total // 1024} KB inline, about {2 * total // 1024} KB as three subagents "
-          "(passes 3 and 5 both read the tree; passes 4 and 5 both read the history)")
+    print(f"reading: about {total // 1024} KB in all: pass 3 reads tree.txt, pass 4 messages.txt and delta.txt")
 
 
-# ---- pass 6 ------------------------------------------------------------------------------
+# ---- pass 5 ------------------------------------------------------------------------------
 
 def where(categories, repo):
     cats = []
@@ -290,6 +291,68 @@ def where(categories, repo):
         print(f"{name}: {count} lines in {len(commits)} commits ({', '.join(sorted(commits)) or 'none'}); "
               f"files: {', '.join(sorted(files)) or 'none'}")
         print(f"  final tree: {', '.join(shown) or 'none'}{f' (+{more} more)' if more > 0 else ''}")
+
+
+# ---- diff review ---------------------------------------------------------------------------
+
+AUDITED = "refs/audited/main"  # local to the checkout: a push of main never sends it
+
+
+def categories(hidden):
+    """The Hidden list's category headings."""
+    return [line[4:].strip() for line in Path(hidden).read_text(encoding="utf-8").splitlines() if line.startswith("### ")]
+
+
+def audited_categories(repo):
+    return Path(git(repo, "rev-parse", "--absolute-git-dir").strip()) / "audited-categories"  # never pushed
+
+
+def mark(repo, hidden):
+    git(repo, "update-ref", AUDITED, "main")
+    audited_categories(repo).write_text("".join(c + "\n" for c in categories(hidden)), encoding="utf-8")
+    print(f"{AUDITED} is now {git(repo, 'rev-parse', '--short', 'main').strip()}, read for "
+          f"{len(categories(hidden))} Hidden list categories: the next diff review starts here.")
+
+
+def diff(out, repo, hidden):
+    """What a reader of the audited build hasn't seen: the final tree's diff, every new commit's own patch (a line
+    one adds and a later one removes is in no tree diff), and every message that is new or reworded.
+    A commit is matched across rebuilds by its author time, since a rewrite changes every hash after it."""
+    if git(repo, "rev-parse", "-q", "--verify", AUDITED, check=False).strip() == "":
+        print(f"No {AUDITED} in {repo}: nothing has been read yet, so this needs a full audit.")
+        return 1
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    tree = git(repo, "diff", "--no-color", "--no-renames", "--no-ext-diff", AUDITED, "main")
+    seen = set(git(repo, "log", "--format=%at", AUDITED).split())
+    fresh = [h for h, when in (line.split() for line in git(repo, "log", "--reverse", "--format=%H %at", "main").splitlines())
+             if when not in seen]
+    patches = git(repo, "show", "--no-color", "--no-renames", "--no-ext-diff", "--format====COMMIT %h %as", *fresh) \
+        if fresh else ""
+    changes = f"=====TREE {AUDITED}..main\n{tree}\n=====NEW COMMITS ({len(fresh)})\n{patches}"
+    (out / "diff.txt").write_text(changes, encoding="utf-8")
+
+    def messages(ref):
+        log = git(repo, "log", "--reverse", "--format=%x01%h %at %as%n%B", ref)
+        for entry in log.split("\x01")[1:]:
+            head, _, body = entry.partition("\n")
+            short, when, day = head.split()
+            yield short, when, day, body.strip()
+
+    read = {(when, body) for _, when, _, body in messages(AUDITED)}
+    new = [(short, day, body) for short, when, day, body in messages("main") if (when, body) not in read]
+    with open(out / "messages.txt", "w", encoding="utf-8") as f:
+        for short, day, body in new:
+            f.write(f"=====COMMIT {short} {day}\n{body}\n\n")
+    files = sum(line.startswith("diff --git ") for line in tree.splitlines())
+    print(f"diff.txt: {files} files changed in the tree and {len(fresh)} new commits' patches, "
+          f"{changes.count(chr(10))} lines; messages.txt: {len(new)} commit messages new or reworded since {AUDITED}")
+    record = audited_categories(repo)
+    read_for = set(record.read_text(encoding="utf-8").splitlines()) if record.exists() else set()
+    for category in categories(hidden):
+        if category not in read_for:
+            print(f"NEW CATEGORY: {category} (the audited build wasn't read for it: it needs a category read)")
+    return 0
 
 
 # ---- map ---------------------------------------------------------------------------------
@@ -387,6 +450,10 @@ def main(argv):
     if command in ("prepare", "where") and 1 <= len(args) <= 2:
         repo = args[1] if len(args) == 2 else mirror().MIRROR
         return prepare(args[0], repo) if command == "prepare" else where(args[0], repo)
+    if command == "diff" and 1 <= len(args) <= 2:
+        return diff(args[0], args[1] if len(args) == 2 else mirror().MIRROR, MIRROR_SKILL / "hidden.md")
+    if command == "mark" and len(args) <= 1:
+        return mark(args[0] if args else mirror().MIRROR, MIRROR_SKILL / "hidden.md")
     if command == "map" and args:
         m = mirror()
         rules = load_rules(m.MAP)

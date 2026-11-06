@@ -88,4 +88,4 @@ Everything that could identify the user, their network or their hosts gets a sta
 - Removed with no stand-in: MACs, UUIDs, container IDs, drive serials and labels, Git remotes, the ISP, the location, the network move, and personal names.
 - Dates → month and year.
 - Hardware models, OS and software versions stay.
-- **In the Mirror** ([`homelab-mirror`](../homelab-mirror/SKILL.md)) the text is runbooks and commands rather than prose, so: full dates stay; standard and software-default ports stay, and each port chosen for this homelab gets a stand-in port, the same number everywhere; `10.x` and `172.16–31.x` addresses stay (private ranges identify nothing); the tailnet is `tail0000.ts.net`, the server is `homelab`, and people are `alice` and `bob`; media titles become public-domain works of the same shape. The owner's name and time zone, and the home's situation (the network move, the router), stay as they are, since the Mirror is pushed from the owner's named account (ADR 0005).
+- **The Mirror** has its own rules ([`homelab-mirror/RULES.md`](../homelab-mirror/RULES.md)); these don't apply to it.

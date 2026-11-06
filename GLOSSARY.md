@@ -69,9 +69,21 @@ Content taken from a chat that has not yet been checked against the live host.
 _Avoid_: Draft, unconfirmed
 
 **Mirror**:
-The public copy of the Playbook, with every identifying detail swapped for a stand-in. Its history follows the Playbook's commit for commit.
+The public copy of the Playbook, with every identifying detail swapped for a stand-in and everything on the Hidden list left out. Its history follows the Playbook's commit for commit, less the commits left empty.
 _Avoid_: Sandbox, public repo, fork
 
 **Stand-in**:
 A made-up value that replaces an identifying detail, the same everywhere it appears.
 _Avoid_: Fake, placeholder (a placeholder such as `<JWT_SECRET>` marks where a secret was left out)
+
+**Mirror rules**:
+How the Mirror is made from the Playbook: what is left out, how stand-ins are chosen, and how commit messages are treated. The owner edits them.
+_Avoid_: Guidelines, policy, the map (the map is the list of real values and their stand-ins, which the rules govern)
+
+**Hidden list**:
+What must not be recoverable from the Mirror, by category, each with what is published on purpose beside it. The owner edits it, and it is never published.
+_Avoid_: Not findings, blocklist, secrets (secrets are kept out of the Playbook itself)
+
+**Mirror audit**:
+A check of the Mirror against the Mirror rules (conformance) and the Hidden list (exposure).
+_Avoid_: Review, scan

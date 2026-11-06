@@ -1,7 +1,9 @@
 """Leak check for the Mirror. Prints one line per identifying value left anywhere in its history; nothing when clean.
 
-Usage: python3 -I leak_check.py <mirror-repo> <map.txt> <allowed-email>
+Usage: python3 -I leak_check.py <mirror-repo> <map.txt> <allowed-email> [<forbidden.txt>]
 Exit 0 = clean, 1 = leaks found. Every commit on every ref is checked, not only the latest.
+forbidden.txt: one term per line, no stand-in. A plain term matches in any case from a word start;
+"regex:<python re>" matches as written.
 """
 import ipaddress
 import json
@@ -30,7 +32,8 @@ def real_values(map_file):
     return literals, regexes
 
 
-PRIVATE = ("homelab-mirror/map.txt", "homelab-mirror/identity.txt")  # never leave the Playbook
+PRIVATE = tuple(f"homelab-mirror/{name}" for name in  # never leave the Playbook; mirror.py drops them
+                ("map.txt", "identity.txt", "hidden.md", "cuts.txt", "forbidden.txt", "leave-out.txt"))
 TAILNET = re.compile(r"\btail[0-9a-z]+\.ts\.net\b", re.I)
 IPV4 = re.compile(r"(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")  # not after a letter or _: v0.9.1.4, TheTVDB_24.0.0.0
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
@@ -83,11 +86,25 @@ def gitleaks(repo):
     return [f"GITLEAKS {f['Commit'][:8]} {f['File']}: {f['RuleID']}" for f in json.loads(r.stdout or "[]")]
 
 
-def main(repo, map_file, allowed_email):
+def word_start(value):
+    """Any case ("quillbarrowzz.yml" for Quillbarrow), but only from a word start ("nozzle" isn't Ozzle)."""
+    return re.compile((r"(?<![A-Za-z0-9])" if value[0].isalnum() else "") + re.escape(value), re.I)
+
+
+def forbidden_terms(path):
+    """(term, pattern) for each line of forbidden.txt."""
+    terms = []
+    for line in open(path, encoding="utf-8") if path else []:
+        line = line.rstrip("\r\n")
+        if line.strip() and not line.lstrip().startswith("#"):
+            terms.append((line, re.compile(line[6:]) if line.startswith("regex:") else word_start(line)))
+    return terms
+
+
+def main(repo, map_file, allowed_email, forbidden_file=None):
     literals, regexes = real_values(map_file)
-    # Any case ("quillbarrowzz.yml" for Quillbarrow), but only from a word start ("nozzle" isn't Ozzle).
-    literal_patterns = [(v, re.compile((r"(?<![A-Za-z0-9])" if v[0].isalnum() else "") + re.escape(v), re.I))
-                        for v in literals]
+    literal_patterns = [(v, word_start(v)) for v in literals]
+    forbidden = forbidden_terms(forbidden_file)
     leaks = []
 
     def check_map(where, text):
@@ -100,6 +117,9 @@ def main(repo, map_file, allowed_email):
                 leaks.append(f"MAP {where}: {m.group(0)}")
         for kind, match in pattern_leaks(text, allowed_email):
             leaks.append(f"{kind} {where}: {match}")
+        for term, rx in forbidden:
+            if rx.search(text):
+                leaks.append(f"FORBIDDEN {where}: {term}")
 
     for commit, path, text in added_lines(repo):
         check_map(f"{commit} {path}", text)
@@ -136,4 +156,4 @@ def main(repo, map_file, allowed_email):
 
 
 if __name__ == "__main__":
-    sys.exit(main(*sys.argv[1:4]))
+    sys.exit(main(*sys.argv[1:5]))

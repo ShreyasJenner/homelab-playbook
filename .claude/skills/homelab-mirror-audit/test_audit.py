@@ -69,7 +69,7 @@ def test_prepare_keeps_only_what_the_final_tree_lost(tmp_path, capsys):
     assert "-old line" in delta and "+gone page" in delta and "docs/b.md] file deleted" in delta
     assert "kept line" not in delta and "new line" not in delta
     assert "Edit one, delete one" in messages and NAME not in messages
-    assert "KB as three subagents" in capsys.readouterr().out
+    assert "pass 3 reads tree.txt" in capsys.readouterr().out
 
 
 def test_where_names_places_not_matches(tmp_path, capsys):
@@ -111,3 +111,49 @@ def test_map_marks_back_reference_and_short_stand_ins(tmp_path, capsys):
     assert "song ⟦良宵⟧" in out
     assert "a ⟦b⟧? c" in out  # a short ASCII stand-in only as a whole word, and only as a maybe
     assert "stand-ins from rules [1, 2, 3]" in out and "maybe from rules [4]" in out
+
+
+def test_diff_gives_what_changed_since_the_audited_build(tmp_path, capsys):
+    repo = make_repo(tmp_path, [("Audited", {"docs/a.md": "old line\nsame line\n"}, "2026-10-30T10:00:00+00:00")])
+    hidden = tmp_path / "hidden.md"
+    hidden.write_text("### 1. The domain\n")
+    audit.mark(repo, hidden)
+    git(repo, "commit", "-q", "--amend", "-m", "Audited, message reworded", date="2026-10-30T10:00:00+00:00")
+    (repo / "docs/a.md").write_text("new line\nsame line\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "Later", date="2026-11-01T10:00:00+00:00")
+    read = tmp_path / "read"
+    assert audit.diff(read, repo, hidden) == 0
+    changes, messages = (read / "diff.txt").read_text(), (read / "messages.txt").read_text()
+    assert "+new line" in changes and "-old line" in changes and "+same line" not in changes
+    assert "Later" in messages and "Audited, message reworded" in messages
+    assert "2 commit messages" in capsys.readouterr().out
+
+
+def test_diff_without_an_audited_build_asks_for_a_full_audit(tmp_path, capsys):
+    repo = make_repo(tmp_path, [("First", {"a.md": "one\n"}, None)])
+    assert audit.diff(tmp_path / "read", repo, tmp_path / "hidden.md") == 1
+    assert "full audit" in capsys.readouterr().out
+
+
+def test_diff_names_a_hidden_list_category_added_since_the_audit(tmp_path, capsys):
+    repo = make_repo(tmp_path, [("First", {"a.md": "one\n"}, None)])
+    hidden = tmp_path / "hidden.md"
+    hidden.write_text("# Hidden list\n\n### 1. The domain\n\ntext\n")
+    audit.mark(repo, hidden)
+    hidden.write_text("# Hidden list\n\n### 1. The domain\n\n### 2. Pets' names\n")
+    assert audit.diff(tmp_path / "read", repo, hidden) == 0
+    out = capsys.readouterr().out
+    assert "NEW CATEGORY: 2. Pets' names" in out and "1. The domain" not in out.split("NEW CATEGORY")[-1]
+
+
+def test_diff_holds_a_line_that_new_commits_added_then_removed(tmp_path):
+    repo = make_repo(tmp_path, [("Audited", {"a.md": "one\n"}, "2026-10-30T10:00:00+00:00")])
+    hidden = tmp_path / "hidden.md"
+    hidden.write_text("### 1. The domain\n")
+    audit.mark(repo, hidden)
+    for text, when in (("one\nfleeting line\n", "2026-11-01T10:00:00+00:00"), ("one\n", "2026-11-02T10:00:00+00:00")):
+        (repo / "a.md").write_text(text)
+        git(repo, "commit", "-q", "-am", "Edit", date=when)
+    audit.diff(tmp_path / "read", repo, hidden)
+    assert "+fleeting line" in (tmp_path / "read" / "diff.txt").read_text()
