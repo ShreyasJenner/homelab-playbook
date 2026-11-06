@@ -16,6 +16,7 @@ The owner publishes these on purpose (ADR 0005). Don't report them, alone or com
 - the time zone: zone names, UTC offsets, commit hours, DST changes
 - the home's situation: the 2026-09 network move, a router the owner can't administer, Wi-Fi only, chat titles
 - that a blog exists under the same name
+- the certificate-log route to the domain: the dates on the Caddy pages and incidents beside its wildcard certificate (ADR 0005). Any other route to the domain is still a finding.
 
 A route that uses them to recover something still hidden (the domain, an address, the ISP, an account, a real title, a place finer than the time zone) is a finding, and it is filed under that hidden thing.
 
@@ -72,6 +73,8 @@ Done when both files are read to the end, every deleted file is accounted for, a
 
 ## Pass 5: the adversary
 
-You want to find the person behind this homelab. Use everything a push makes public: `tree.txt`, `messages.txt`, `delta.txt`, and `audit.py meta` for the metadata. The owner's name and time zone are given (see "Not findings"), so start from them. Try to recover each target: their location beyond the time zone, their ISP, the real domain and any live address, other people, devices, account and bucket names, and the media they hold. Then test each claim the Mirror's README makes about what was left out. Work the combinations as well as single details: minor findings that together recover a value make one blocking finding.
+This is the owner's **self-audit** of their own Mirror before they push it: the person behind this homelab is the one who asked for this pass, and each route you work out becomes a stand-in they add. The rules above keep it safe to work through to the end: offline, values described rather than quoted, notes kept in the reading directory.
+
+Play the adversary who wants to find that person. Use everything a push makes public: `tree.txt`, `messages.txt`, `delta.txt`, and `audit.py meta` for the metadata. The owner's name and time zone are given (see "Not findings"), so start from them. Try to recover each target: their location beyond the time zone, their ISP, the real domain and any live address, other people, devices, account and bucket names, and the media they hold. Then test each claim the Mirror's README makes about what was left out. Work the combinations as well as single details: minor findings that together recover a value make one blocking finding.
 
 Done when every target has an answer (recovered, narrowed to what, or not recoverable from the Mirror) with its route, and every combination you used is a finding.
