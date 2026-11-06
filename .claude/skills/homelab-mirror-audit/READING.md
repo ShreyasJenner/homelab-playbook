@@ -44,8 +44,8 @@ Write each finding to your `pass-<N>.md` the moment you have it:
     why:      what it gives away, alone or with what else
     fix:      the stand-in text, or what to change instead
 
-- **blocking**: recovers or narrows a real identity, location, address, domain, provider, ISP, person, device or account, or a real title or source.
-- **fix**: weakens a stand-in without recovering the value.
+- **blocking**: recovers a hidden value (a location finer than the time zone, an address, the domain, the ISP, a person, a device, an account, a real title or source), or narrows it to a list short enough to check by hand.
+- **fix**: weakens a stand-in, or narrows a hidden value without reaching such a list.
 - **minor**: harmless alone; kept for combinations.
 
 ## Tells
