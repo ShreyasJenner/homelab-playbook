@@ -16,7 +16,9 @@ The owner publishes these on purpose (ADR 0005). Don't report them, alone or com
 - the time zone: zone names, UTC offsets, commit hours, DST changes
 - the home's situation: the 2026-09 network move, a router the owner can't administer, Wi-Fi only, chat titles
 - that a blog exists under the same name
+- the services the owner uses, named without an account name: Last.fm as the scrobble target, the cloud drives, healthchecks.io, B2. That a profile on one may carry the owner's name or handle follows from the name being published.
 - the certificate-log route to the domain: the dates on the Caddy pages and incidents beside its wildcard certificate (ADR 0005). Any other route to the domain is still a finding.
+- the Funnel route to the tailnet and machine names: the Funnel ports, the services behind them, and the dates Funnel and HTTPS were first turned on, beside the public certificate logs (ADR 0005). Any other route to those names is still a finding.
 
 A route that uses them to recover something still hidden (the domain, an address, the ISP, an account, a real title, a place finer than the time zone) is a finding, and it is filed under that hidden thing.
 
