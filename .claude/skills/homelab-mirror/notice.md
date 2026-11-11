@@ -8,4 +8,4 @@ This is the documentation for my self-hosted homelab: a home server running abou
 - Usernames and other people are `alice` and `bob`, and devices have generic names. The ISP is left out.
 - Some services, and the pages and passages about them, are left out entirely.
 
-Standard ports and each software's default ports are real; ports chosen for this homelab are stand-ins, the same number everywhere. Dates, software versions, hardware and media titles are real. `.claude/skills/homelab-mirror/RULES.md` lists the rules the mirror is built by, and `docs/adr/0005-public-mirror-with-stand-ins.md` explains why.
+Standard ports and each software's default ports are real; ports chosen for this homelab are stand-ins, the same number everywhere. Dates, software versions, hardware and media titles are real, except that the drives go by size and interface alone. `.claude/skills/homelab-mirror/RULES.md` lists the rules the mirror is built by, and `docs/adr/0005-public-mirror-with-stand-ins.md` explains why.

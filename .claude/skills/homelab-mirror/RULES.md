@@ -26,10 +26,11 @@ A stand-in comes from a rule in `map.txt`. It is fixed, never random, the same e
 - **The tailnet and machine names**: `tail0000.ts.net`, and `homelab` for the server. Devices get a generic name (`laptop-1`, `phone`).
 - **Ports**: each port chosen for this homelab gets one stand-in port, the same number everywhere. Standard ports and software defaults stay.
 - **Usernames**: `alice` and `bob`. The owner's GitHub handle stays, as a username too.
+- **Drives**: their size and interface. The maker, product line and model code go.
 - **Keys, tokens and passwords** never reach the Playbook (ADR 0001); its placeholders stay as they are.
 
 ## Kept as they are
 
 - The owner's name, GitHub handle and email.
-- Dates, in full. Hardware models, OS and software versions.
+- Dates, in full. Hardware models other than the drives', OS and software versions.
 - The media services and the media in them: real titles, songs and artists.
